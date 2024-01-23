@@ -10,6 +10,7 @@ to convert my LaTeX documents into a PDF, a SVG or an HTML document.
   you want a PDF.
 * Extract and convert your `tikzpicture` images from your LaTeX documents.
 * Automatically compresses your SVG files using SVGO.
+* Render transformed HTML math elements using Katex (can easily be configured).
 
 ## Use cases
 
