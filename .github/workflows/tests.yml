@@ -27,6 +27,10 @@ jobs:
     container:
       image: skyost/latex-docker
       options: --user ${{ needs.configure.outputs.containerUser }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+        node: [ latest ]
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
