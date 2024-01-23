@@ -11,8 +11,21 @@ on:
       - master
 
 jobs:
+  configure:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+    outputs:
+      containerUser: ${{ steps.get-user.outputs.containerUser }}
+    steps:
+      - id: get-user
+        run: echo "containerUser=`id -u`:`id -g`" >> $GITHUB_OUTPUT
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    container:
+      image: skyost/latex-docker
+      options: --user ${{ needs.configure.outputs.containerUser }}
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@v3
