@@ -69,7 +69,11 @@ export interface TransformOptions {
    * @param {string} element The math element.
    * @returns {string} The rendered math content.
    */
-  renderMathElement?: (element: HTMLElement) => string
+  renderMathElement?: (element: HTMLElement) => string,
+  /**
+   * Passed to `generateSvg` and `generatedPdf`.
+   */
+  generateIfExists?: boolean
 }
 
 /**
@@ -244,7 +248,8 @@ const extractImages = (
         {
           includeGraphicsDirectories,
           cacheDirectory: options.getExtractedImageCacheDirectory?.call(texFilePath, extractedImageTexFilePath),
-          optimize: true
+          optimize: true,
+          generateIfExists: options.generateIfExists
         }
       )
 
@@ -368,7 +373,8 @@ const resolveImageSrc = (
       {
         includeGraphicsDirectories,
         cacheDirectory: options.getResolvedImageCacheDirectory?.call(imagePath),
-        optimize: true
+        optimize: true,
+        generateIfExists: options.generateIfExists
       }
     )
 
