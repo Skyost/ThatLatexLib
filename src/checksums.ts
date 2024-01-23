@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { generateChecksum, getFileName } from './utils/utils'
+import { generateChecksum, getFileName } from './utils/utils.js'
 import * as fs from 'fs'
 
 /**

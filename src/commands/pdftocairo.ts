@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { getFileName } from '../utils/utils'
+import { getFileName } from '../utils/utils.js'
 import * as path from 'path'
 import * as fs from 'fs'
 

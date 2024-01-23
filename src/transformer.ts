@@ -1,11 +1,13 @@
+// noinspection ES6PreferShortImport
+
 import { spawnSync } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as logger from './utils/logger'
-import { generateSvg } from './generator'
+import * as logger from './utils/logger.js'
+import { generateSvg } from './generator.js'
 import { HTMLElement, parse } from 'node-html-parser'
-import { pdftocairo } from './commands/pdftocairo'
-import { getFileName } from './utils/utils'
+import { pdftocairo } from './commands/pdftocairo.js'
+import { getFileName } from './utils/utils.js'
 import katex from 'katex'
 
 /**
@@ -177,7 +179,7 @@ export const renderMathElement = (
   filterUnknownSymbols?: (math: string) => string
 ): string => {
   const math = element.text.trim()
-  return katex.renderToString(filterUnknownSymbols?.call(math) ?? math, {
+  return katex.renderToString(filterUnknownSymbols?.call(this, math) ?? math, {
     displayMode: element.getAttribute('env') === 'displaymath', // Determine if it's a display math environment.
     output: 'html',
     trust: true,
@@ -231,7 +233,7 @@ const extractImages = (
       fs.mkdirSync(path.dirname(extractedImageTexFilePath), { recursive: true })
 
       // Write the template content with the matched block content to the extracted image LaTeX file.
-      const includeGraphicsDirectories: string[] = options.getIncludeGraphicsDirectories?.call(extractedImageTexFilePath) ?? []
+      const includeGraphicsDirectories: string[] = options.getIncludeGraphicsDirectories?.call(this, extractedImageTexFilePath) ?? []
       fs.writeFileSync(
         extractedImageTexFilePath,
         template
@@ -247,7 +249,7 @@ const extractImages = (
         extractedImageTexFilePath,
         {
           includeGraphicsDirectories,
-          cacheDirectory: options.getExtractedImageCacheDirectory?.call(texFilePath, extractedImageTexFilePath),
+          cacheDirectory: options.getExtractedImageCacheDirectory?.call(this, texFilePath, extractedImageTexFilePath),
           optimize: true,
           generateIfExists: options.generateIfExists
         }
@@ -312,7 +314,7 @@ const replaceImages = (
     }
 
     // Directories to search for the image.
-    const directories = ['', ...(options.getIncludeGraphicsDirectories?.call(texFilePath) ?? [path.dirname(texFilePath)])]
+    const directories = ['', ...(options.getIncludeGraphicsDirectories?.call(this, texFilePath) ?? [path.dirname(texFilePath)])]
 
     // Try resolving the image from various directories and extensions.
     for (const directory of directories) {
@@ -372,7 +374,7 @@ const resolveImageSrc = (
       imagePath,
       {
         includeGraphicsDirectories,
-        cacheDirectory: options.getResolvedImageCacheDirectory?.call(imagePath),
+        cacheDirectory: options.getResolvedImageCacheDirectory?.call(this, imagePath),
         optimize: true,
         generateIfExists: options.generateIfExists
       }
