@@ -22,6 +22,7 @@ jobs:
       - id: get-user
         run: echo "containerUser=`id -u`:`id -g`" >> $GITHUB_OUTPUT
   test:
+    needs: configure
     runs-on: ${{ matrix.os }}
     container:
       image: skyost/latex-docker
