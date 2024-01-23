@@ -118,7 +118,7 @@ export const generatePdf = (
   const checksumsFilePath = path.resolve(directory, `${fileName}${checksumsExtension}`)
 
   // Check if the PDF file exists and generation is not forced.
-  if (fs.existsSync(pdfFilePath) && options?.generateIfExists) {
+  if (fs.existsSync(pdfFilePath) && !options?.generateIfExists) {
     // If the checksums file does not exist, generate and save checksums.
     if (!fs.existsSync(checksumsFilePath)) {
       fs.writeFileSync(
