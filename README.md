@@ -1,0 +1,34 @@
+# ThatLatexLib
+
+Just a very simple wrapper around `latexmk`, `pdftocairo`, `svgo` and `pandoc` that allows me
+to convert my LaTeX documents into a PDF, a SVG or an HTML document.
+
+## Features
+
+* Convert your LaTeX files to use them in your web pages.
+* Calculate TeX files checksums so that you don't have to regenerate it each time
+  you want a PDF.
+* Extract and convert your `tikzpicture` images from your LaTeX documents.
+* Automatically compresses your SVG files using SVGO.
+
+## Use cases
+
+I'm currently using it in three of my Nuxt projects :
+
+* [MesCoursDeMaths](https://github.com/Skyost/MesCoursDeMaths) ;
+* [Agregation](https://github.com/Skyost/Agregation) ;
+* [Bacomathiques](https://github.com/Skyost/Bacomathiques).
+
+In these projects, everything is written in LaTeX, then processed using this library.
+Here's an [example output page](https://agreg.skyost.eu/developpements/caracterisation-reelle-de-gamma/).
+
+Feel free to use it in your projects as well :wink:
+
+## Usage
+
+See the [tests directory](https://github.com/Skyost/ThatLatexLib/blob/master/tests/) to see how you can use
+this library.
+
+## License
+
+Licensed under the MIT license. See [here](https://github.com/Skyost/ThatLatexLib/blob/master/LICENSE).
