@@ -6,6 +6,7 @@ import { generateSvg } from './generator'
 import { HTMLElement, parse } from 'node-html-parser'
 import { pdftocairo } from './commands/pdftocairo'
 import { getFileName } from './utils/utils'
+import katex from 'katex'
 
 /**
  * Allows to configure the transformer.
@@ -61,7 +62,14 @@ export interface TransformOptions {
    * @param {string} resolvedImageFilePath The resolved image path.
    * @returns {string} The src attribute.
    */
-  imagePathToSrc?: (resolvedImageFilePath: string) => string
+  imagePathToSrc?: (resolvedImageFilePath: string) => string,
+  /**
+   * The function that allows to render math elements.
+   *
+   * @param {string} element The math element.
+   * @returns {string} The rendered math content.
+   */
+  renderMathElement?: (element: HTMLElement) => string
 }
 
 /**
@@ -131,8 +139,41 @@ export const transformToHtml = (
     printLogs
   )
 
+  // Render math.
+  renderMath(root, options)
+
   return root
 }
+
+/**
+ * Render all math elements.
+ *
+ * @param {HTMLElement} root The root elements.
+ * @param {TransformOptions} options The transform options.
+ */
+const renderMath = (root: HTMLElement, options: TransformOptions) => {
+  const mathElements = root.querySelectorAll('eq')
+  for (const mathElement of mathElements) {
+    // Replace the math element with the rendered KaTeX HTML.
+    mathElement.replaceWith((options?.renderMathElement ?? renderMathElement)(mathElement))
+  }
+}
+
+/**
+ * Allows to render a given math element.
+ *
+ * @param {HTMLElement} element The element.
+ * @param {[key: string]: string} macros The macros.
+ * @returns The rendered element.
+ */
+export const renderMathElement = (element: HTMLElement, macros: {[key: string]: string} = {}) => katex.renderToString(element.text.trim(), {
+  displayMode: element.getAttribute('env') === 'displaymath', // Determine if it's a display math environment.
+  output: 'html',
+  trust: true,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  strict: (errorCode: any) => errorCode === 'htmlExtension' ? 'ignore' : 'warn',
+  macros
+})
 
 /**
  * Extract images from LaTeX content and replace them with HTML-friendly references.
