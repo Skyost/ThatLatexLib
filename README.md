@@ -27,8 +27,7 @@ Feel free to use it in your projects as well :wink:
 
 ## Usage
 
-See the [tests directory](https://github.com/Skyost/ThatLatexLib/blob/master/tests/) to see how you can use
-this library.
+Check the [tests directory](https://github.com/Skyost/ThatLatexLib/blob/master/tests/) to see how you can use this library.
 
 ## License
 
