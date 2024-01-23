@@ -4,7 +4,7 @@ import * as path from 'path'
 describe("Checksums", () => {
   it("simple checksums calculator", () => {
     const result = calculateTexFileChecksums(path.resolve(__dirname, '_files', 'simple.tex'))
-    expect(result).toEqual({'file:simple': '910b8c13892d630eac92cb89e93e40f9'});
+    expect(result).toEqual({'file:simple': '108c59e46ac65f9eec3257d5b60903fe'});
   })
   it("complex checksums calculator", () => {
     const result = calculateTexFileChecksums(
@@ -12,10 +12,10 @@ describe("Checksums", () => {
       ['graphics']
     )
     expect(result).toEqual({
-      'file:complex': 'e3a02c4210192871a328937681013bc7',
+      'file:complex': '66702ac7b36e24344d4d9483da16c99b',
       'includegraphics:test.png': '418a4ca95ce3d4620c44a1951c37336c',
       'include:commands.tex': {
-        'file:commands': '08eae57c93dde70db47e79d1a3e2cec7'
+        'file:commands': 'd03026a07e55b4f39b138ba042f5f009'
       }
     });
   })

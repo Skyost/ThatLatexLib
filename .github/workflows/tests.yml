@@ -1,4 +1,4 @@
-name: Tests CI
+name: Test & Build CI
 
 on:
   push:
@@ -41,5 +41,7 @@ jobs:
           cache: 'npm'
       - name: Install dependencies 👨🏻‍💻
         run: npm ci
-      - name: Test ⚙️
+      - name: Test ✅
         run: npm run test
+      - name: Build ⚙️
+        run: npm run build
