@@ -1,12 +1,12 @@
 // noinspection ES6PreferShortImport
 
-import { getFileName } from './utils/utils.js'
+import { getFileName } from './utils/utils'
 import * as path from 'path'
 import * as fs from 'fs'
-import { calculateTexFileChecksums, checksumsExtension } from './checksums.js'
-import { latexmk } from './commands/latexmk.js'
+import { calculateTexFileChecksums, checksumsExtension } from './checksums'
+import { latexmk } from './commands/latexmk'
 import { execSync } from 'child_process'
-import { pdftocairo } from './commands/pdftocairo.js'
+import { pdftocairo } from './commands/pdftocairo'
 import { optimize, PluginConfig } from 'svgo'
 import { XastElement, XastParent, XastRoot } from 'svgo/lib/types'
 

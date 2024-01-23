@@ -1,6 +1,7 @@
+// noinspection ES6PreferShortImport
+
 import { transformToHtml } from '../src/transformer'
 import * as path from 'path'
-import * as fs from 'fs'
 
 describe("Transformer", () => {
   it("simple html transform", () => {

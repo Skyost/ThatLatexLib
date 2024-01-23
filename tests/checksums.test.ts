@@ -1,3 +1,5 @@
+// noinspection ES6PreferShortImport
+
 import { calculateTexFileChecksums } from '../src/checksums'
 import * as path from 'path'
 

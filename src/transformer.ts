@@ -3,11 +3,11 @@
 import { spawnSync } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as logger from './utils/logger.js'
-import { generateSvg } from './generator.js'
+import * as logger from './utils/logger'
+import { generateSvg } from './generator'
 import { HTMLElement, parse } from 'node-html-parser'
-import { pdftocairo } from './commands/pdftocairo.js'
-import { getFileName } from './utils/utils.js'
+import { pdftocairo } from './commands/pdftocairo'
+import { getFileName } from './utils/utils'
 import katex from 'katex'
 
 /**

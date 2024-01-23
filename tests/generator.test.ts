@@ -1,3 +1,5 @@
+// noinspection ES6PreferShortImport
+
 import { generatePdf, generateSvg } from '../src/generator'
 import * as path from 'path'
 

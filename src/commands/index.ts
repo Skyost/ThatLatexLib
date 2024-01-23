@@ -1,2 +1,2 @@
-export * from './latexmk.js'
-export * from './pdftocairo.js'
+export * from './latexmk'
+export * from './pdftocairo'
