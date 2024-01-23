@@ -163,17 +163,25 @@ const renderMath = (root: HTMLElement, options: TransformOptions) => {
  * Allows to render a given math element.
  *
  * @param {HTMLElement} element The element.
+ * @param {(math: string) => string} filterUnknownSymbols Allows to filter unknown symbols.
  * @param {[key: string]: string} macros The macros.
- * @returns The rendered element.
+ * @returns {string} The rendered element.
  */
-export const renderMathElement = (element: HTMLElement, macros: {[key: string]: string} = {}) => katex.renderToString(element.text.trim(), {
-  displayMode: element.getAttribute('env') === 'displaymath', // Determine if it's a display math environment.
-  output: 'html',
-  trust: true,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  strict: (errorCode: any) => errorCode === 'htmlExtension' ? 'ignore' : 'warn',
-  macros
-})
+export const renderMathElement = (
+  element: HTMLElement,
+  filterUnknownSymbols?: (math: string) => string,
+  macros?: {[key: string]: string}
+): string => {
+  const math = element.text.trim()
+  return katex.renderToString(filterUnknownSymbols?.call(math) ?? math, {
+    displayMode: element.getAttribute('env') === 'displaymath', // Determine if it's a display math environment.
+    output: 'html',
+    trust: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    strict: (errorCode: any) => errorCode === 'htmlExtension' ? 'ignore' : 'warn',
+    macros
+  })
+}
 
 /**
  * Extract images from LaTeX content and replace them with HTML-friendly references.
