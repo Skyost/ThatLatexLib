@@ -6,7 +6,7 @@ import * as fs from 'fs'
 import * as logger from './utils/logger'
 import { generateSvg } from './generator'
 import { HTMLElement, parse } from 'node-html-parser'
-import { pdftocairo } from './commands/pdftocairo'
+import { pdftocairo } from './commands'
 import { getFileName } from './utils/utils'
 import katex from 'katex'
 
