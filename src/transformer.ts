@@ -26,7 +26,7 @@ export interface TransformOptions {
    * @param {string} extractedImageTexFilePath The extracted file path.
    * @returns {string} The extracted image cache directory.
    */
-  getExtractedImageCacheDirectory?: (extractedFrom: string, extractedImageTexFilePath: string) => string,
+  getExtractedImageCacheDirectoryPath?: (extractedFrom: string, extractedImageTexFilePath: string) => string,
   /**
    * Returns the given extracted image target directory.
    * It will be a subdirectory of the assets directory (see `assetsRootDirectoryPath` below).
@@ -254,7 +254,7 @@ const extractImages = (
         extractedImageTexFilePath,
         {
           includeGraphicsDirectories,
-          cacheDirectory: options.getExtractedImageCacheDirectory?.call(this, texFilePath, extractedImageTexFilePath),
+          cacheDirectoryPath: options.getExtractedImageCacheDirectoryPath?.call(this, texFilePath, extractedImageTexFilePath),
           optimize: true,
           generateIfExists: options.generateIfExists
         }
@@ -379,7 +379,7 @@ const resolveImageSrc = (
       imagePath,
       {
         includeGraphicsDirectories,
-        cacheDirectory: options.getResolvedImageCacheDirectory?.call(this, imagePath),
+        cacheDirectoryPath: options.getResolvedImageCacheDirectory?.call(this, imagePath),
         optimize: true,
         generateIfExists: options.generateIfExists
       }

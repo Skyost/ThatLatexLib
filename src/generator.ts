@@ -20,7 +20,7 @@ export interface GenerateOptions {
   /**
    * Directory to find cached generated files.
    */
-  cacheDirectory?: string
+  cacheDirectoryPath?: string
   /**
    * The cached file name.
    */
@@ -133,7 +133,7 @@ export const generatePdf = (
   }
 
   // Retrieve cache information if caching is enabled.
-  const cacheResult = options.cacheDirectory ? getCacheInfo(texFilePath, options) : null
+  const cacheResult = options.cacheDirectoryPath ? getCacheInfo(texFilePath, options) : null
 
   // Check if the file and its checksums are fully cached.
   if (cacheResult && cacheResult.isFullyCached) {
@@ -244,8 +244,8 @@ const getCacheInfo = (texFilePath: string, options: GenerateOptions): CacheResul
   const checksums = JSON.stringify(calculateTexFileChecksums(texFilePath, options.includeGraphicsDirectories))
 
   // Generate paths to the cached PDF and checksums files.
-  const cachedPdfFilePath = path.resolve(options.cacheDirectory!, `${fileName}.pdf`)
-  const cachedChecksumsFilePath = path.resolve(options.cacheDirectory!, `${fileName}${checksumsExtension}`)
+  const cachedPdfFilePath = path.resolve(options.cacheDirectoryPath!, `${fileName}.pdf`)
+  const cachedChecksumsFilePath = path.resolve(options.cacheDirectoryPath!, `${fileName}${checksumsExtension}`)
 
   // Check if both the cached PDF and checksums files exist, and if the checksums match the expected values.
   const isFullyCached =
