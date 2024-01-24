@@ -57,7 +57,7 @@ export interface TransformOptions {
    *
    * @param {string} resolvedImageTexFilePath The resolved image.
    */
-  getResolvedImageCacheDirectory?: (resolvedImageTexFilePath: string) => string,
+  getResolvedImageCacheDirectoryPath?: (resolvedImageTexFilePath: string) => string,
   /**
    * Converts an image path to a src attribute.
    *
@@ -379,7 +379,7 @@ const resolveImageSrc = (
       imagePath,
       {
         includeGraphicsDirectories,
-        cacheDirectoryPath: options.getResolvedImageCacheDirectory?.call(this, imagePath),
+        cacheDirectoryPath: options.getResolvedImageCacheDirectoryPath?.call(this, imagePath),
         optimize: true,
         generateIfExists: options.generateIfExists
       }
