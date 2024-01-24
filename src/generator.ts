@@ -3,7 +3,7 @@
 import { getFileName } from './utils/utils'
 import * as path from 'path'
 import * as fs from 'fs'
-import { calculateTexFileChecksums, checksumsExtension } from './checksums'
+import { calculateTexFileChecksums, Checksums, checksumsExtension } from './checksums'
 import { latexmk, pdftocairo } from './commands'
 import { execSync } from 'child_process'
 import { optimize, PluginConfig } from 'svgo'
@@ -33,6 +33,13 @@ export interface GenerateOptions {
    * Directories to search for graphics files.
    */
   includeGraphicsDirectories?: string[]
+  /**
+   * The checksums calculator function.
+   *
+   * @param texFilePath The path to the Latex file.
+   * @param includeGraphicsDirectories Directories to search for graphics files.
+   */
+  checksumsCalculator?: (texFilePath: string, includeGraphicsDirectories: string[]) => Checksums,
 }
 
 /**
@@ -117,14 +124,15 @@ export const generatePdf = (
 
   // Initialize the path to the checksums file.
   const checksumsFilePath = path.resolve(directory, `${fileName}${checksumsExtension}`)
+  const checksumsCalculator = options.checksumsCalculator ?? calculateTexFileChecksums
 
   // Check if the PDF file exists and generation is not forced.
-  if (fs.existsSync(pdfFilePath) && !options?.generateIfExists) {
+  if (fs.existsSync(pdfFilePath) && !options.generateIfExists) {
     // If the checksums file does not exist, generate and save checksums.
     if (!fs.existsSync(checksumsFilePath)) {
       fs.writeFileSync(
         checksumsFilePath,
-        JSON.stringify(calculateTexFileChecksums(texFilePath, options.includeGraphicsDirectories)),
+        JSON.stringify(checksumsCalculator(texFilePath, options.includeGraphicsDirectories)),
         { encoding: 'utf8' }
       )
     }
@@ -153,7 +161,7 @@ export const generatePdf = (
   if (pdfFilePath) {
     fs.writeFileSync(
       checksumsFilePath,
-      cacheResult?.checksums ?? JSON.stringify(calculateTexFileChecksums(texFilePath, options.includeGraphicsDirectories)),
+      cacheResult?.checksums ?? JSON.stringify(checksumsCalculator(texFilePath, options.includeGraphicsDirectories)),
       { encoding: 'utf8' }
     )
     execSync('latexmk -quiet -c', { cwd: directory })
@@ -186,7 +194,7 @@ export const generateSvg = (
   let svgFilePath = path.resolve(directory, `${fileName}.svg`)
 
   // Check if the SVG file exists and generation is not forced.
-  if (fs.existsSync(svgFilePath) && !options?.generateIfExists) {
+  if (fs.existsSync(svgFilePath) && !options.generateIfExists) {
     // Return information indicating that the file was retrieved from the cache.
     return { builtFilePath: svgFilePath, wasCached: true }
   }
@@ -241,7 +249,8 @@ const getCacheInfo = (texFilePath: string, options: GenerateOptions): CacheResul
   const fileName = options.cachedFileName ?? getFileName(texFilePath)
 
   // Calculate the checksums for the current LaTeX file, including graphics directories.
-  const checksums = JSON.stringify(calculateTexFileChecksums(texFilePath, options.includeGraphicsDirectories))
+  const checksumsCalculator = options.checksumsCalculator ?? calculateTexFileChecksums
+  const checksums = JSON.stringify(checksumsCalculator(texFilePath, options.includeGraphicsDirectories))
 
   // Generate paths to the cached PDF and checksums files.
   const cachedPdfFilePath = path.resolve(options.cacheDirectoryPath!, `${fileName}.pdf`)

@@ -101,7 +101,7 @@ export const transformToHtml = (
   const rawContent = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
 
   // Extract images from the .tex file content and return the modified content.
-  const content = options?.imagesTemplate && options?.getExtractedImageTargetDirectory ?
+  const content = options.imagesTemplate && options.getExtractedImageTargetDirectory ?
     extractImages(
       rawContent,
       texFilePath,
@@ -166,7 +166,7 @@ const renderMath = (root: HTMLElement, options: TransformOptions) => {
   const mathElements = root.querySelectorAll('eq')
   for (const mathElement of mathElements) {
     // Replace the math element with the rendered KaTeX HTML.
-    mathElement.replaceWith((options?.renderMathElement ?? renderMathElement)(mathElement))
+    mathElement.replaceWith((options.renderMathElement ?? renderMathElement)(mathElement))
   }
 }
 
