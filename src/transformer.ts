@@ -75,7 +75,11 @@ export interface TransformOptions {
   /**
    * Passed to `generateSvg` and `generatedPdf`.
    */
-  generateIfExists?: boolean
+  generateIfExists?: boolean,
+  /**
+   * Arguments to pass to Pandoc.
+   */
+  pandocArguments?: string
 }
 
 /**
@@ -110,6 +114,7 @@ export const transformToHtml = (
   if (header.length > 0) {
     header += '\n'
   }
+
   const pandocResult = spawnSync(
     'pandoc',
     [
@@ -117,9 +122,9 @@ export const transformToHtml = (
       'latex-auto_identifiers',
       '-t',
       'html',
-      '--shift-heading-level-by=1',
       '--gladtex',
-      '--html-q-tags'
+      '--html-q-tags',
+      ...(options.pandocArguments ?? [])
     ],
     {
       env: process.env,
