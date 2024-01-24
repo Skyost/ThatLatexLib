@@ -14,7 +14,7 @@ describe("Transformer", () => {
       {
         pandocHeader: '\\providecommand{\\ifpandoc}[2]{#1}',
         getExtractedImageTargetDirectory: () => 'extracted',
-        picturesTemplate: {
+        imagesTemplate: {
           'tikzpicture': `\\documentclass[tikz]{standalone}
 \\usepackage{tkz-euclide}
 \\usepackage{fourier-otf}

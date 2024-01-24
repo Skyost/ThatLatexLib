@@ -44,10 +44,10 @@ export interface TransformOptions {
    */
   getIncludeGraphicsDirectories?: (texFilePath: string) => string[],
   /**
-   * The pictures template. Should contain two macros :
+   * The images template. Should contain two macros :
    * {graphicspath} for the `includegraphics` directories and {extractedContent} for the extracted image content.
    */
-  picturesTemplate?: {[key: string]: string},
+  imagesTemplate?: {[key: string]: string},
   /**
    * The assets root directory path (where to find images from a given src attribute).
    */
@@ -97,7 +97,7 @@ export const transformToHtml = (
   const rawContent = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
 
   // Extract images from the .tex file content and return the modified content.
-  const content = options?.picturesTemplate && options?.getExtractedImageTargetDirectory ?
+  const content = options?.imagesTemplate && options?.getExtractedImageTargetDirectory ?
     extractImages(
       rawContent,
       texFilePath,
@@ -208,7 +208,7 @@ const extractImages = (
   let result = latexContent
 
   // Process each block type specified in the pictures template.
-  for (const blockType of Object.keys(options.picturesTemplate)) {
+  for (const blockType of Object.keys(options.imagesTemplate)) {
     // Regular expression to match the block type content in LaTeX.
     const regex = new RegExp(`\\\\begin{${blockType}}([\\s\\S]*?)\\\\end{${blockType}}`, 'sg')
 
@@ -227,7 +227,7 @@ const extractImages = (
       const extractedImageTexFilePath = path.resolve(options.assetsRootDirectoryPath, options.getExtractedImageTargetDirectory(texFilePath, fileName), fileName)
 
       // Read the template for the current block type.
-      const template = options.picturesTemplate[blockType]
+      const template = options.imagesTemplate[blockType]
 
       // Create directories if they don't exist.
       fs.mkdirSync(path.dirname(extractedImageTexFilePath), { recursive: true })
