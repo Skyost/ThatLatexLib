@@ -127,7 +127,7 @@ export const calculateTexFileChecksums = (
         let directories = [
           null,
           currentDirectory,
-          ...latexIncludeCommand.directories.map((directory) => path.resolve(currentDirectory, directory))
+          ...latexIncludeCommand.directories.map(directory => path.resolve(currentDirectory, directory))
         ]
         if (fileDirectory !== currentDirectory) {
           directories.push(fileDirectory)
@@ -179,7 +179,7 @@ export const calculateTexFileChecksums = (
             if (fs.existsSync(includeFile)) {
               // Calculate checksums for included files.
               if (latexIncludeCommand.hasIncludes) {
-                checksums[checksumKey] = calculateTexFileChecksums(includeFile, includeGraphicsDirectories, currentDirectory)
+                checksums[checksumKey] = calculateTexFileChecksums(includeFile, includeGraphicsDirectories, currentDirectory, latexIncludeCommands)
               } else {
                 checksums[checksumKey] = generateChecksum(fs.readFileSync(includeFile, { encoding: 'utf8' }))
               }
