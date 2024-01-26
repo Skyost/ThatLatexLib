@@ -127,7 +127,7 @@ export const calculateTexFileChecksums = (
         let directories = [
           null,
           currentDirectory,
-          ...latexIncludeCommand.directories
+          ...latexIncludeCommand.directories.map((directory) => path.resolve(currentDirectory, directory))
         ]
         if (fileDirectory !== currentDirectory) {
           directories.push(fileDirectory)
@@ -136,7 +136,7 @@ export const calculateTexFileChecksums = (
           directories = [...directories, ...includeGraphicsDirectories]
         }
         for (const directory of directories) {
-          let includeFile = directory == null ? fileName : path.resolve(currentDirectory, directory, fileName)
+          let includeFile = directory == null ? fileName : path.resolve(directory, fileName)
 
           // Check if the target is a directory.
           if (latexIncludeCommand.targetIsDirectory) {
