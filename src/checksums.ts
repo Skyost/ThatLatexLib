@@ -96,7 +96,8 @@ export const calculateTexFileChecksums = (
   latexIncludeCommands: LatexIncludeCommand[] = defaultLatexIncludeCommands
 ): Checksums => {
   // If currentDirectory is not provided, use the directory of the LaTeX file.
-  currentDirectory ??= path.dirname(filePath)
+  const fileDirectory = path.dirname(filePath)
+  currentDirectory ??= fileDirectory
 
   // Initialize an object to store checksums.
   const checksums: Checksums = {}
@@ -123,7 +124,14 @@ export const calculateTexFileChecksums = (
       // Check if the file should be excluded and if its checksum has not been calculated yet.
       if (!latexIncludeCommand.excludes.includes(fileName) && !(checksumKey in checksums)) {
         // Iterate through each directory for the current LaTeX include command.
-        let directories = [null, currentDirectory, ...latexIncludeCommand.directories]
+        let directories = [
+          null,
+          currentDirectory,
+          ...latexIncludeCommand.directories
+        ]
+        if (fileDirectory !== currentDirectory) {
+          directories.push(fileDirectory)
+        }
         if (latexIncludeCommand.hasGraphics) {
           directories = [...directories, ...includeGraphicsDirectories]
         }
@@ -146,12 +154,13 @@ export const calculateTexFileChecksums = (
 
                 // Calculate checksums for files inside the directory.
                 if (latexIncludeCommand.hasIncludes) {
-                  checksums[subKey] = calculateTexFileChecksums(subPath, includeGraphicsDirectories, currentDirectory)
+                  directoryChecksums[subKey] = calculateTexFileChecksums(subPath, includeGraphicsDirectories, currentDirectory)
                 } else {
-                  checksums[subKey] = generateChecksum(fs.readFileSync(subPath, { encoding: 'utf8' }))
+                  directoryChecksums[subKey] = generateChecksum(fs.readFileSync(subPath, { encoding: 'utf8' }))
                 }
               }
               checksums[checksumKey] = directoryChecksums
+              break
             }
           } else {
             // Check each possible extension for the include file.
