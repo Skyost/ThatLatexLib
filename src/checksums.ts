@@ -154,7 +154,7 @@ export const calculateTexFileChecksums = (
 
                 // Calculate checksums for files inside the directory.
                 if (latexIncludeCommand.hasIncludes) {
-                  directoryChecksums[subKey] = calculateTexFileChecksums(subPath, includeGraphicsDirectories, currentDirectory)
+                  directoryChecksums[subKey] = calculateTexFileChecksums(subPath, includeGraphicsDirectories, currentDirectory, latexIncludeCommands)
                 } else {
                   directoryChecksums[subKey] = generateChecksum(fs.readFileSync(subPath, { encoding: 'utf8' }))
                 }
