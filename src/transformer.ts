@@ -79,7 +79,7 @@ export interface TransformOptions {
   /**
    * Arguments to pass to Pandoc.
    */
-  pandocArguments?: string
+  pandocArguments?: string[]
 }
 
 /**
@@ -319,7 +319,11 @@ const replaceImages = (
     }
 
     // Directories to search for the image.
-    const directories = ['', ...(options.getIncludeGraphicsDirectories?.call(this, texFilePath) ?? [path.dirname(texFilePath)])]
+    const directories = [
+      '',
+      ...(options.getIncludeGraphicsDirectories?.call(this, texFilePath) ?? [path.dirname(texFilePath)]),
+      options.getExtractedImageTargetDirectory(texFilePath, src)
+    ]
 
     // Try resolving the image from various directories and extensions.
     for (const directory of directories) {
