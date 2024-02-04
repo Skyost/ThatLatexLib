@@ -1,8 +1,8 @@
 import { execSync } from 'child_process'
 import { getFileName } from '../utils/utils'
-import * as logger from '../utils/logger'
 import * as path from 'path'
 import * as fs from 'fs'
+import { consola } from 'consola'
 
 /**
  * Calls latexmk to compile a LaTeX file and generate a PDF.
@@ -14,6 +14,7 @@ import * as fs from 'fs'
  * @returns {string | null} Path to the generated PDF or null on failure.
  */
 export const latexmk = (directory: string, texFile: string, clean: boolean = true, printLogs: boolean = true): string | null => {
+  const logger = consola.withTag('latexmk')
   try {
     // Execute latexmk command to compile the LaTeX file using LuaLaTeX.
     execSync(`latexmk -lualatex "${texFile}"`, { cwd: directory })
@@ -30,7 +31,7 @@ export const latexmk = (directory: string, texFile: string, clean: boolean = tru
   } catch (ex) {
     // Handle errors during compilation.
     if (printLogs) {
-      logger.fatal('latexmk', ex)
+      logger.fatal(ex)
     }
 
     // Log additional information from the compilation log if available.
@@ -38,8 +39,8 @@ export const latexmk = (directory: string, texFile: string, clean: boolean = tru
     if (fs.existsSync(logFile)) {
       const logString = fs.readFileSync(logFile, { encoding: 'utf8' })
       if (printLogs) {
-        logger.fatal('latexmk', 'Here is the log:')
-        logger.fatal('latexmk', logString)
+        logger.fatal('Here is the log:')
+        logger.fatal(logString)
       }
     }
 

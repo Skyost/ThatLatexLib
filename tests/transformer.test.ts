@@ -6,7 +6,7 @@ import * as path from 'path'
 describe("Transformer", () => {
   it("simple html transform", () => {
     const result = transformToHtml(path.resolve(__dirname, '_files', 'simple.tex'))
-    expect(removeLineBreaks(result.toString())).toEqual('<p>Hello World !</p>');
+    expect(removeLineBreaks(result.htmlResult.toString())).toEqual('<p>Hello World !</p>');
   })
   it("complex html transform", () => {
     const result = transformToHtml(
@@ -35,7 +35,7 @@ every picture/.append style={scale=1.5, every node/.style={scale=1.5}}
         assetsRootDirectoryPath: path.resolve(__dirname, '_files', 'graphics'),
       }
     )
-    expect(removeLineBreaks(result.toString())).toEqual(removeLineBreaks(`<div class="center">
+    expect(removeLineBreaks(result.htmlResult.toString())).toEqual(removeLineBreaks(`<div class="center">
 <p>This is a simple shared command.</p>
 <p>We’re using Pandoc !</p>
 <p><img src="/graphics/test.png" style="height:5cm" alt="test"></p>

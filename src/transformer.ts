@@ -3,12 +3,12 @@
 import { spawnSync } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as logger from './utils/logger'
 import { generateSvg } from './generator'
 import { HTMLElement, parse } from 'node-html-parser'
 import { pdftocairo } from './commands'
 import { getFileName } from './utils/utils'
 import katex from 'katex'
+import { consola } from 'consola'
 
 /**
  * Allows to configure the transformer.
@@ -83,20 +83,34 @@ export interface TransformOptions {
 }
 
 /**
+ * The return result of the transformer.
+ */
+export interface TransformResult {
+  /**
+   * The replaced images (key is the filename, value is the new source).
+   */
+  replacedImages: {[key: string]: string},
+  /**
+   * The parsed HTML result of the transformation.
+   */
+  htmlResult: HTMLElement
+}
+
+/**
  * Transforms a Latex file to HTML.
  *
  * @param {string} texFilePath Path to the main LaTeX file.
  * @param {TransformOptions} options The transform options.
  * @param {boolean} printLogs Whether to print logs.
  * @param {string} texFileContent The Latex file content.
- * @return {HTMLElement} The parsed HTML content.
+ * @return {TransformResult} The transformation result.
  */
 export const transformToHtml = (
   texFilePath: string,
   options: TransformOptions = {},
   printLogs: boolean = true,
   texFileContent?: string
-): HTMLElement => {
+): TransformResult => {
   // Read the tex content.
   const rawContent = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
 
@@ -143,7 +157,7 @@ export const transformToHtml = (
   const root = parse(pandocResult.stdout)
 
   // Replace images in the HTML content.
-  replaceImages(
+  const replacedImages = replaceImages(
     root,
     texFilePath,
     options,
@@ -153,7 +167,10 @@ export const transformToHtml = (
   // Render math.
   renderMath(root, options)
 
-  return root
+  return {
+    htmlResult: root,
+    replacedImages
+  }
 }
 
 /**
@@ -211,6 +228,9 @@ const extractImages = (
 ): string => {
   // Clone the original LaTeX content.
   let result = latexContent
+
+  /// Gets a logger instance.
+  const logger = consola.withTag('extractImages')
 
   // Process each block type specified in the pictures template.
   for (const blockType of Object.keys(options.imagesTemplate)) {
@@ -291,17 +311,24 @@ const extractImages = (
 /**
  * Replace LaTeX image references in the HTML tree with resolved image sources.
  *
- * @param {HTMLElement} root - The root of the HTML tree.
- * @param {string} texFilePath - The path of the LaTeX file from the content directory.
- * @param {TransformOptions} options - The transformer options.
- * @param {boolean} printLogs - Whether to print logs.
+ * @param {HTMLElement} root The root of the HTML tree.
+ * @param {string} texFilePath The path of the LaTeX file from the content directory.
+ * @param {TransformOptions} options The transformer options.
+ * @param {boolean} printLogs Whether to print logs.
+ * @returns {{[key: string]: string} = {}} The replaced images (key is the filename, value is the new source).
  */
 const replaceImages = (
   root: HTMLElement,
   texFilePath: string,
   options: TransformOptions,
   printLogs: boolean
-) => {
+): { [key: string]: string } => {
+  /// Gets a logger instance.
+  const logger = consola.withTag('replaceImages')
+
+  // Contains the result.
+  const result: {[key: string]: string} = {}
+
   // Possible image file extensions.
   const extensions = ['', '.svg', '.tex', '.pdf', '.png', '.jpeg', '.jpg', '.gif']
 
@@ -346,6 +373,7 @@ const replaceImages = (
             image.setAttribute('alt', getFileName(src))
 
             resolved = true
+            result[src] = filePath
             if (printLogs) {
               logger.success('replaceImages', `Resolved image ${src} to ${resolvedSrc} in ${texFilePath}.`)
             }
@@ -360,6 +388,8 @@ const replaceImages = (
       }
     }
   }
+
+  return result
 }
 
 /**
