@@ -373,7 +373,7 @@ const replaceImages = (
             image.setAttribute('alt', getFileName(src))
 
             resolved = true
-            result[src] = filePath
+            result[resolvedSrc] = filePath
             if (printLogs) {
               logger.success('replaceImages', `Resolved image ${src} to ${resolvedSrc} in ${texFilePath}.`)
             }
