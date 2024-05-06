@@ -17,7 +17,7 @@ export const latexmk = (directory: string, texFile: string, clean: boolean = tru
   const logger = consola.withTag('latexmk')
   try {
     // Execute latexmk command to compile the LaTeX file using LuaLaTeX.
-    execSync(`latexmk -lualatex "${texFile}"`, { cwd: directory })
+    execSync(`latexmk -lualatex "${texFile}"`, { cwd: directory, stdio: 'ignore' })
     // Generate the path to the resulting PDF file.
     const result = path.resolve(directory, `${getFileName(texFile)}.pdf`)
 
