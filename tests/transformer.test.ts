@@ -1,21 +1,28 @@
 // noinspection ES6PreferShortImport
 
-import { transformToHtml } from '../src/transformer'
 import * as path from 'path'
+import { LatexImageExtractor, Pandoc, PandocTransformer, SvgGenerator } from '../src'
 
 describe("Transformer", () => {
   it("simple html transform", () => {
-    const result = transformToHtml(path.resolve(__dirname, '_files', 'simple.tex'))
+    const transformer = new PandocTransformer()
+    const result = transformer.transform(path.resolve(__dirname, '_files', 'simple.tex'))
     expect(removeLineBreaks(result.htmlResult.toString())).toEqual('<p>Hello World !</p>');
   })
   it("complex html transform", () => {
-    const result = transformToHtml(
-      path.resolve(__dirname, '_files', 'complex.tex'),
-      {
-        pandocHeader: '\\providecommand{\\ifpandoc}[2]{#1}',
-        getExtractedImageTargetDirectory: () => 'extracted',
-        imagesTemplate: {
-          'tikzpicture': `\\documentclass[tikz]{standalone}
+    const transformer = new PandocTransformer(
+      PandocTransformer.resolveFromAssetsRoot(
+        path.resolve(__dirname, '_files', 'graphics'),
+      ),
+      [
+        new LatexImageExtractor(
+          'tikzpicture',
+          path.resolve(__dirname, '_files', 'graphics', 'extracted'),
+          (latexContent, includeGraphicsDirectories) => {
+            const graphicsPath = includeGraphicsDirectories
+              .map(directory => `{${directory.replaceAll('\\', '\\\\')}}`)
+              .join('\n')
+            return `\\documentclass[tikz]{standalone}
 \\usepackage{tkz-euclide}
 \\usepackage{fourier-otf}
 \\usepackage{fontspec}
@@ -27,15 +34,22 @@ describe("Transformer", () => {
   },
 every picture/.append style={scale=1.5, every node/.style={scale=1.5}}
 }
-{graphicspath}
+\\graphicspath{${graphicsPath}}
 \\begin{document}
-  {extractedContent}
+  ${latexContent}
 \\end{document}`
-        },
-        assetsRootDirectoryPath: path.resolve(__dirname, '_files', 'graphics'),
-      }
+          }
+        )
+      ]
     )
-    expect(removeLineBreaks(result.htmlResult.toString())).toEqual(removeLineBreaks(`<div class="center">
+    const result = transformer.transform(
+      path.resolve(__dirname, '_files', 'complex.tex'),
+      null,
+      new Pandoc(
+        '\\providecommand{\\ifpandoc}[2]{#1}',
+      )
+    )
+    expect(removeLineBreaks(result.htmlResult.outerHTML)).toEqual(removeLineBreaks(`<div class="center">
 <p>This is a simple shared command.</p>
 <p>We’re using Pandoc !</p>
 <p><img src="/graphics/test.png" style="height:5cm" alt="test"></p>
@@ -44,4 +58,4 @@ every picture/.append style={scale=1.5, every node/.style={scale=1.5}}
   })
 })
 
-const removeLineBreaks = (input: string): string => input.trim().replace(/\r\n|\r|\n/g, '<br>')
+const removeLineBreaks = (input: string): string => input.trim().replace(/\r\n|\r|\n/g, '')

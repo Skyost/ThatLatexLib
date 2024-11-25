@@ -1,4 +1,4 @@
-export * from './commands'
 export * from './checksums'
-export * from './generator'
+export * from './commands'
+export * from './generators'
 export * from './transformer'
