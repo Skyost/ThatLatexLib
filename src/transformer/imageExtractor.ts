@@ -6,21 +6,11 @@ import { SvgGenerator } from '../generators'
 /**
  * Allows to extract images from a Latex file.
  */
-export class LatexImageExtractor {
+export abstract class LatexImageExtractor {
   /**
    * The image type to extract (eg. `tikzpicture`).
    */
   imageType: string
-
-  /**
-   * Path to the extracted images directory.
-   */
-  directoryPath: string
-
-  /**
-   * The content renderer to use.
-   */
-  contentRenderer: ContentRenderer
 
   /**
    * The SVG generator instance.
@@ -36,23 +26,22 @@ export class LatexImageExtractor {
    * Creates a new `LatexImageExtractor` instance.
    *
    * @param {string} imageType The image type to extract (eg. `tikzpicture`).
-   * @param {string} directoryPath The path where to extract images.
-   * @param {ContentRenderer} contentRenderer The content renderer.
    * @param {SvgGenerator} svgGenerator The SVG generator instance.
-   * @param {boolean} printLogs Whether to print logs.
+   * @param printLogs Whether to print logs.
    */
   constructor(
     imageType: string,
-    directoryPath: string,
-    contentRenderer: ContentRenderer,
-    svgGenerator: SvgGenerator = new SvgGenerator(),
-    printLogs: boolean = true,
+    {
+      svgGenerator = new SvgGenerator(),
+      printLogs = true
+    }: {
+      svgGenerator?: SvgGenerator
+      printLogs?: boolean
+    } = {}
   ) {
-    this.imageType = imageType;
-    this.directoryPath = directoryPath;
-    this.contentRenderer = contentRenderer;
-    this.svgGenerator = svgGenerator;
-    this.logger = printLogs ? consola.withTag('imageExtractor') : null;
+    this.imageType = imageType
+    this.svgGenerator = svgGenerator
+    this.logger = printLogs ? consola.withTag('imageExtractor') : null
   }
 
   /**
@@ -64,7 +53,7 @@ export class LatexImageExtractor {
    */
   extractImages = (
     latexContent: string,
-    texFilePath: string,
+    texFilePath: string
   ): string => {
     // Clone the original LaTeX content.
     let result = latexContent
@@ -82,21 +71,23 @@ export class LatexImageExtractor {
     while (match) {
       // Destination path for the extracted image LaTeX file.
       const extractedImageTexFilePath = path.resolve(
-        this.directoryPath,
+        this.getExtractedImageDirectoryPath(texFilePath),
         this.getExtractedImageFilename(i)
       )
 
       // Create directories if they don't exist.
-      fs.mkdirSync(path.dirname(extractedImageTexFilePath), {recursive: true})
+      fs.mkdirSync(path.dirname(extractedImageTexFilePath), { recursive: true })
 
       // Write the template content with the matched block content to the extracted image LaTeX file.
-      const includeGraphicsDirectories: string[] = this.getIncludeGraphicsDirectories(extractedImageTexFilePath)
-      fs.writeFileSync(extractedImageTexFilePath, this.contentRenderer(match[0], includeGraphicsDirectories))
+      fs.writeFileSync(
+        extractedImageTexFilePath,
+        this.renderContent(extractedImageTexFilePath, match[0])
+      )
 
       // Generate SVG from the extracted image LaTeX file.
       const generateResult = this.svgGenerator.generate(
         extractedImageTexFilePath,
-        this.getExtractedImageCacheDirectoryPath(texFilePath, extractedImageTexFilePath),
+        this.getExtractedImageCacheDirectoryPath(texFilePath, extractedImageTexFilePath)
       )
 
       // If SVG is generated successfully, replace the LaTeX block with an HTML-friendly image reference.
@@ -125,14 +116,19 @@ export class LatexImageExtractor {
   }
 
   /**
-   * Returns the `includegraphics` directories.
+   * Should return the extracted image directory.
    *
-   * @param {string} texFilePath The Latex file path.
-   * @returns {string[]} The `includegraphics` directories.
+   * @param {string} extractedFrom Where the file comes from.
+   * @returns {string} The extracted image cache directory.
    */
-  getIncludeGraphicsDirectories(texFilePath: string): string[] {
-    return []
+  getExtractedImageDirectoryPath(extractedFrom: string): string {
+    return path.dirname(extractedFrom)
   }
+
+  /**
+   * Renders the Latex content into a Latex document.
+   */
+  abstract renderContent: ContentRenderer
 
   /**
    * Should return the extracted image cache directory (where the transformer can find the checksums,
@@ -156,17 +152,68 @@ export class LatexImageExtractor {
     extractedFrom: string,
     extractedImageTexFilePath: string
   ): string | null {
-    return null;
+    extractedFrom.toString()
+    extractedImageTexFilePath.toString()
+    return null
+  }
+}
+
+/**
+ * Allows to extract all images in the same directory.
+ */
+export class LatexImageExtractorInDirectory extends LatexImageExtractor {
+  /**
+   * Path to the extracted images directory.
+   */
+  directoryPath: string
+
+  /**
+   * The content renderer.
+   */
+  contentRenderer: ContentRenderer
+
+  /**
+   * Creates a new `LatexImageExtractor` instance.
+   *
+   * @param {string} imageType The image type to extract (eg. `tikzpicture`).
+   * @param {string} directoryPath The path where to extract images.
+   * @param {ContentRenderer} contentRenderer The content renderer.
+   * @param svgGenerator The SVG generator instance.
+   * @param printLogs Whether to print logs.
+   */
+  constructor(
+    imageType: string,
+    directoryPath: string,
+    contentRenderer: ContentRenderer,
+    {
+      svgGenerator = new SvgGenerator(),
+      printLogs = true
+    }: {
+      svgGenerator?: SvgGenerator
+      printLogs?: boolean
+    } = {}
+  ) {
+    super(imageType, { svgGenerator, printLogs })
+    this.directoryPath = directoryPath
+    this.contentRenderer = contentRenderer
+  }
+
+  override getExtractedImageDirectoryPath(): string {
+    return this.directoryPath
+  }
+
+  override renderContent: ContentRenderer = (extractedImageTexFilePath: string, latexContent: string): string => {
+    return this.contentRenderer(extractedImageTexFilePath, latexContent)
   }
 }
 
 /**
  * Renders the Latex content into a Latex document.
+ * @param {string} extractedImageTexFilePath The extracted image Latex file path.
  * @param {string} latexContent The Latex content.
- * @param {string[]} includeGraphicsDirectories Directories for including graphics.
  * @returns {string} The rendered content.
  */
 export type ContentRenderer = (
-  latexContent: string,
-  includeGraphicsDirectories: string[]
+  extractedImageTexFilePath: string,
+  latexContent: string
 ) => string

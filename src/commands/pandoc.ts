@@ -1,13 +1,10 @@
 import { GenerateCommand } from './command'
 import { spawnSync } from 'child_process'
-import path from 'path'
 
 /**
  * `pandoc` command.
  */
-export class Pandoc extends GenerateCommand {
-  override readonly commandName: string = 'pandoc'
-
+export class PandocCommand extends GenerateCommand {
   /**
    * Can contain an additional Pandoc header.
    */
@@ -18,11 +15,25 @@ export class Pandoc extends GenerateCommand {
    */
   additionalArguments: string[]
 
+  /**
+   * Creates a new `Pandoc` instance.
+   *
+   * @param {string} header Can contain an additional Pandoc header.
+   * @param additionalArguments Additional arguments to pass to Pandoc.
+   * @param printLogs Whether to print logs (eg. on error).
+   */
   constructor(
-    header: string = '',
-    additionalArguments: string[] = []
+    {
+      header = '',
+      additionalArguments = [],
+      printLogs = true
+    }: {
+      header?: string
+      additionalArguments?: string[]
+      printLogs?: boolean
+    } = {}
   ) {
-    super()
+    super('pandoc', { printLogs: printLogs })
     this.header = header
     if (this.header.length > 0) {
       this.header += '\n'
@@ -35,10 +46,9 @@ export class Pandoc extends GenerateCommand {
    *
    * @param {string} directory Working directory.
    * @param {string} content The content.
-   * @param {boolean} printLogs Whether to print logs.
    * @returns {string | null} Transformed content or `null` on failure.
    */
-  override run(directory: string, content: string, printLogs: boolean = true): string | null {
+  override run(directory: string, content: string): string | null {
     try {
       const pandocResult = spawnSync(
         'pandoc',
@@ -49,7 +59,7 @@ export class Pandoc extends GenerateCommand {
           'html',
           '--gladtex',
           '--html-q-tags',
-          ...this.additionalArguments,
+          ...this.additionalArguments
         ],
         {
           env: process.env,
@@ -64,12 +74,10 @@ export class Pandoc extends GenerateCommand {
         throw pandocResult.stderr
       }
       return pandocResult.stdout
-    } catch (ex) {
+    }
+    catch (ex) {
       // Handle errors during compilation.
-      const logger = this.getLogger()
-      if (printLogs) {
-        logger.fatal(ex)
-      }
+      this.logger?.fatal(ex)
     }
     return null
   }

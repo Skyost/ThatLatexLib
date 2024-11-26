@@ -6,9 +6,9 @@ import { ImageSrcResolverResult } from './transformer'
  */
 export class TransformResult {
   /**
-   * The parsed HTML result of the transformation.
+   * The parsed HTML result of the transformation. `null` if failed.
    */
-  htmlResult: HTMLElement
+  htmlResult: HTMLElement | null
 
   /**
    * The replaced images.
@@ -16,8 +16,13 @@ export class TransformResult {
   replacedImages: ImageSrcResolverResult[]
 
   constructor(
-    htmlResult: HTMLElement,
-    replacedImages: ImageSrcResolverResult[] = []
+    {
+      htmlResult = null,
+      replacedImages = []
+    }: {
+      htmlResult?: HTMLElement | null
+      replacedImages?: ImageSrcResolverResult[]
+    } = {}
   ) {
     this.htmlResult = htmlResult
     this.replacedImages = replacedImages

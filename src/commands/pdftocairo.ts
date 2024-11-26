@@ -7,18 +7,30 @@ import { GenerateCommand } from './command'
 /**
  * `pdftocairo` command.
  */
-export class PdfToCairo extends GenerateCommand {
-  override readonly commandName: string = 'pdftocairo'
+export class PdfToCairoCommand extends GenerateCommand {
+  /**
+   * Creates a new `PdfToCairo` instance.
+   *
+   * @param {boolean} printLogs Whether to print logs (eg. on error).
+   */
+  constructor(
+    {
+      printLogs = true
+    }: {
+      printLogs?: boolean
+    } = {}
+  ) {
+    super('pdftocairo', { printLogs: printLogs })
+  }
 
   /**
    * Converts a PDF file to an SVG file using `pdftocairo`.
    *
    * @param {string} directory Working directory.
    * @param {string} pdfFile Path to the PDF file.
-   * @param {boolean} printLogs Whether to print logs.
    * @returns {string} Path to the generated SVG file or `null` on failure.
    */
-  override run (directory: string, pdfFile: string, printLogs: boolean = true): string | null {
+  override run(directory: string, pdfFile: string): string | null {
     try {
       // Generate the desired SVG file name based on the PDF file name.
       const svgFile = `${getFileName(pdfFile)}.svg`
@@ -28,17 +40,15 @@ export class PdfToCairo extends GenerateCommand {
       // Check if the SVG file does not already exist.
       if (!fs.existsSync(svgFilePath)) {
         // Execute pdftocairo command to convert the PDF file to SVG.
-        execSync(`${this.commandName} -svg "${pdfFile}" "${svgFile}"`, {cwd: directory})
+        execSync(`${this.commandName} -svg "${pdfFile}" "${svgFile}"`, { cwd: directory })
       }
 
       // Return the path to the generated SVG file.
       return svgFilePath
-    } catch (ex) {
+    }
+    catch (ex) {
       // Handle errors during compilation.
-      const logger = this.getLogger()
-      if (printLogs) {
-        logger.fatal(ex)
-      }
+      this.logger?.fatal(ex)
 
       // Return null to indicate compilation failure.
       return null

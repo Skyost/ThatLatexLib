@@ -49,9 +49,15 @@ export abstract class LatexGenerator extends Generator<LatexChecksumsCalculator>
    * @param checksumsCalculator The Latex checksums calculator.
    */
   constructor(
-    generateIfExists: boolean = true,
-    clean: boolean = true,
-    checksumsCalculator: LatexChecksumsCalculator = new LatexChecksumsCalculator()
+    {
+      generateIfExists = true,
+      clean = true,
+      checksumsCalculator = new LatexChecksumsCalculator()
+    }: {
+      generateIfExists?: boolean
+      clean?: boolean
+      checksumsCalculator?: LatexChecksumsCalculator
+    } = {}
   ) {
     super(checksumsCalculator)
     this.generateIfExists = generateIfExists

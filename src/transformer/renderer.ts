@@ -28,7 +28,7 @@ export class KatexRenderer extends MathRenderer {
    */
   renderMathElement = (
     element: HTMLElement,
-    macros?: {[key: string]: string},
+    macros?: { [key: string]: string },
     filterUnknownSymbols?: (math: string) => string
   ): string => {
     const math = element.text.trim()

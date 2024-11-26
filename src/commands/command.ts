@@ -1,4 +1,4 @@
-import { consola } from 'consola'
+import { consola, ConsolaInstance } from 'consola'
 
 /**
  * A command for generating a file from another.
@@ -7,12 +7,32 @@ export abstract class GenerateCommand {
   /**
    * The command name.
    */
-  abstract readonly commandName: string
+  commandName: string
 
   /**
-   * The logger instance.
+   * The logger.
    */
-  protected getLogger = () => consola.withTag(this.commandName)
+  logger: ConsolaInstance | null
+
+  /**
+   * Creates a new `Command` instance.
+   *
+   * @param {string} commandName The command name.
+   * @param {boolean} printLogs Whether to print logs (eg. on error).
+   */
+  constructor(
+    commandName: string,
+    {
+      printLogs = true
+    }: {
+      printLogs?: boolean
+    } = {}
+  ) {
+    this.commandName = commandName
+    if (printLogs) {
+      this.logger = consola.withTag(commandName)
+    }
+  }
 
   /**
    * Calls the command on a file and returns the generated file.
@@ -21,5 +41,5 @@ export abstract class GenerateCommand {
    * @param {string} argument String argument to use for the command.
    * @returns {string | null} Path to the generated file or null on failure.
    */
-  abstract run (directory: string, argument: string): string | null
+  abstract run(directory: string, argument: string): string | null
 }

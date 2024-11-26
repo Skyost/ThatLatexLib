@@ -3,9 +3,9 @@ import * as fs from 'fs'
 import { parse, HTMLElement } from 'node-html-parser'
 import { KatexRenderer, MathRenderer } from './renderer'
 import { TransformResult } from './result'
-import { LatexImageExtractor } from './imageExtractor'
+import { LatexImageExtractor, LatexImageExtractorInDirectory } from './imageExtractor'
 import { getFileName } from '../utils/utils'
-import { Pandoc, PdfToCairo } from '../commands'
+import { PandocCommand, PdfToCairoCommand } from '../commands'
 import { SvgGenerator } from '../generators'
 
 /**
@@ -28,20 +28,35 @@ export class PandocTransformer {
   mathRenderer: MathRenderer
 
   /**
-   * Creates a new Pandoc transformer instance.
+   * The Pandoc command.
+   */
+  pandoc: PandocCommand
+
+  /**
+   * Creates a new `PandocTransformer` instance.
    *
    * @param imageSrcResolver The image `src` attribute resolver.
    * @param imageExtractors The Latex image extractors.
    * @param mathRenderer The math renderer.
+   * @param pandoc The Pandoc command.
    */
   constructor(
-    imageSrcResolver: ImageSrcResolver | null = null,
-    imageExtractors: LatexImageExtractor[] = [],
-    mathRenderer: MathRenderer = new KatexRenderer(),
+    {
+      imageSrcResolver = null,
+      imageExtractors = [],
+      mathRenderer = new KatexRenderer(),
+      pandoc = new PandocCommand()
+    }: {
+      imageSrcResolver?: ImageSrcResolver | null
+      imageExtractors?: LatexImageExtractor[]
+      mathRenderer?: MathRenderer
+      pandoc?: PandocCommand
+    } = {}
   ) {
     this.imageSrcResolver = imageSrcResolver
     this.imageExtractors = imageExtractors
     this.mathRenderer = mathRenderer
+    this.pandoc = pandoc
   }
 
   /**
@@ -49,13 +64,11 @@ export class PandocTransformer {
    *
    * @param {string} texFilePath Path to the main LaTeX file.
    * @param {string} texFileContent The Latex file content.
-   * @param {Pandoc} pandoc The Pandoc command.
    * @return {TransformResult} The transformation result.
    */
   transform = (
     texFilePath: string,
-    texFileContent?: string,
-    pandoc: Pandoc = new Pandoc()
+    texFileContent?: string
   ): TransformResult => {
     // Read the tex content.
     let content = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
@@ -66,7 +79,10 @@ export class PandocTransformer {
     }
 
     // Parse the content using Pandoc.
-    const pandocResult = pandoc.run(path.resolve(path.dirname(texFilePath)), content)
+    const pandocResult = this.pandoc.run(path.resolve(path.dirname(texFilePath)), content)
+    if (!pandocResult) {
+      return new TransformResult()
+    }
 
     // Parse the Pandoc HTML output.
     const root = parse(pandocResult)
@@ -77,10 +93,10 @@ export class PandocTransformer {
     // Render math.
     this.renderMath(root)
 
-    return new TransformResult(
-      root,
+    return new TransformResult({
+      htmlResult: root,
       replacedImages
-    )
+    })
   }
 
   /**
@@ -94,7 +110,6 @@ export class PandocTransformer {
     root: HTMLElement,
     texFilePath: string
   ): ImageSrcResolverResult[] => {
-
     // Contains the result.
     const result: ImageSrcResolverResult[] = []
 
@@ -111,7 +126,7 @@ export class PandocTransformer {
         continue
       }
 
-      const resolveResult = this.imageSrcResolver(this, texFilePath, src)
+      const resolveResult = this.imageSrcResolver?.call(this, this, texFilePath, src)
       if (resolveResult) {
         // Update the image source and alt attribute.
         image.setAttribute('src', resolveResult.resolvedSrc)
@@ -139,19 +154,27 @@ export class PandocTransformer {
    * Allows to resolve an image `src` attribute from an assets root directory.
    *
    * @param {string} assetsRootDirectoryPath  The assets root directory path.
-   * @param {((imagePath: string) => string) | null} getImageCacheDirectoryPath Allows to return the image cache directory from a given image path.
-   * @param {((imagePath: string) => string) | null} imagePathToSrc Converts an image path to a `src` attribute.
+   * @param subdirectories Subdirectories to check for assets.
+   * @param getImageCacheDirectoryPath Allows to return the image cache directory from a given image path.
+   * @param imagePathToSrc Converts an image path to a `src` attribute.
    */
   static resolveFromAssetsRoot(
     assetsRootDirectoryPath: string,
-    getImageCacheDirectoryPath: ((imagePath: string) => string) | null = null,
-    imagePathToSrc: ((imagePath: string) => string) | null = null,
+    {
+      subdirectories = [],
+      getImageCacheDirectoryPath = null,
+      imagePathToSrc = null
+    }: {
+      subdirectories?: string[]
+      getImageCacheDirectoryPath?: ((imagePath: string) => string) | null
+      imagePathToSrc?: ((imagePath: string) => string) | null
+    } = {}
   ): ImageSrcResolver {
     return (pandocTransformer: PandocTransformer, texFilePath: string, src: string): ImageSrcResolverResult | null => {
       const svgGenerator = pandocTransformer.imageExtractors[0]?.svgGenerator ?? new SvgGenerator()
       if (src.startsWith('file://')) {
         const filePath = path.resolve(src.substring('file://'.length))
-        const result = PandocTransformer._transformToImageIfNeeded(
+        const result = PandocTransformer.transformToImageIfNeeded(
           filePath,
           svgGenerator,
           assetsRootDirectoryPath,
@@ -169,12 +192,14 @@ export class PandocTransformer {
       // Directories to search for the image.
       const directories = [
         '',
-        path.dirname(texFilePath)
+        path.dirname(texFilePath),
+        ...subdirectories
       ]
 
       for (const imageExtractor of pandocTransformer.imageExtractors) {
-        directories.push(...imageExtractor.getIncludeGraphicsDirectories(texFilePath))
-        directories.push(imageExtractor.directoryPath)
+        if (imageExtractor instanceof LatexImageExtractorInDirectory) {
+          directories.push(imageExtractor.directoryPath)
+        }
       }
 
       // Try resolving the image from various directories and extensions.
@@ -186,7 +211,7 @@ export class PandocTransformer {
 
           // Check if the file exists.
           if (fs.existsSync(filePath)) {
-            const result = PandocTransformer._transformToImageIfNeeded(
+            const result = PandocTransformer.transformToImageIfNeeded(
               filePath,
               svgGenerator,
               assetsRootDirectoryPath,
@@ -212,12 +237,12 @@ export class PandocTransformer {
    * @param {((imagePath: string) => string) | null} getImageCacheDirectoryPath Allows to return the image cache directory from a given image path.
    * @param {((imagePath: string) => string) | null} imagePathToSrc Converts an image path to a `src` attribute.
    */
-  static _transformToImageIfNeeded(
+  private static transformToImageIfNeeded(
     filePath: string,
     svgGenerator: SvgGenerator,
     assetsRootDirectoryPath: string,
     getImageCacheDirectoryPath: ((imagePath: string) => string) | null = null,
-    imagePathToSrc: ((imagePath: string) => string) | null = null,
+    imagePathToSrc: ((imagePath: string) => string) | null = null
   ): ImageSrcResolverResult | null {
     // Resolve the image source.
     let imagePath = filePath
@@ -236,9 +261,14 @@ export class PandocTransformer {
 
       // Update the image path to the generated SVG.
       imagePath = builtFilePath
-    } else if (extension === '.pdf') {
-      const pdfToCairo = new PdfToCairo()
-      imagePath = pdfToCairo.run(path.dirname(imagePath), path.basename(imagePath))
+    }
+    else if (extension === '.pdf') {
+      const pdfToCairo = new PdfToCairoCommand()
+      const result = pdfToCairo.run(path.dirname(imagePath), path.basename(imagePath))
+      if (!result) {
+        return null
+      }
+      imagePath = result
     }
 
     // Return the relative path from the assets destination directory.

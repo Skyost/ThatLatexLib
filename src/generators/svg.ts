@@ -6,7 +6,7 @@ import { optimize, type PluginConfig } from 'svgo'
 import type { XastElement, XastParent, XastRoot } from 'svgo/lib/types'
 import { GenerateResult } from './result'
 import { LatexChecksumsCalculator } from '../checksums'
-import { PdfToCairo } from '../commands'
+import { PdfToCairoCommand } from '../commands'
 import { PdfGenerator } from './pdf'
 
 /**
@@ -37,21 +37,26 @@ export class SvgGenerator extends LatexGenerator {
    * @param pdfGenerator The PDF generator to use.
    */
   constructor(
-    generateIfExists: boolean = true,
-    clean: boolean = true,
-    optimize: boolean = true,
-    svgoPlugins: PluginConfig[] = [forceUnit],
-    checksumsCalculator: LatexChecksumsCalculator = new LatexChecksumsCalculator(),
-    pdfGenerator: PdfGenerator | null = null,
+    {
+      generateIfExists = true,
+      clean = true,
+      checksumsCalculator = new LatexChecksumsCalculator(),
+      optimize = true,
+      svgoPlugins = [forceUnit],
+      pdfGenerator = null
+    }: {
+      generateIfExists?: boolean
+      clean?: boolean
+      checksumsCalculator?: LatexChecksumsCalculator
+      optimize?: boolean
+      svgoPlugins?: PluginConfig[]
+      pdfGenerator?: PdfGenerator | null
+    } = {}
   ) {
-    super(generateIfExists, clean, checksumsCalculator)
+    super({ generateIfExists, clean, checksumsCalculator })
     this.optimize = optimize
     this.svgoPlugins = svgoPlugins
-    this.pdfGenerator = pdfGenerator ?? (new PdfGenerator(
-      this.generateIfExists,
-      this.clean,
-      this.checksumsCalculator,
-    ))
+    this.pdfGenerator = pdfGenerator ?? (new PdfGenerator({ generateIfExists, clean, checksumsCalculator }))
   }
 
   /**
@@ -72,12 +77,15 @@ export class SvgGenerator extends LatexGenerator {
     const directory = path.dirname(filePath)
 
     // Initialize the path to the SVG file.
-    let svgFilePath = path.resolve(directory, `${fileName}.svg`)
+    let svgFilePath: string | null = path.resolve(directory, `${fileName}.svg`)
 
     // Check if the SVG file exists and generation is not forced.
     if (fs.existsSync(svgFilePath) && !this.generateIfExists) {
       // Return information indicating that the file was retrieved from the cache.
-      return new GenerateResult(svgFilePath, true)
+      return new GenerateResult({
+        builtFilePath: svgFilePath,
+        wasCached: true
+      })
     }
 
     // Generate the PDF file, if not cached.
@@ -89,12 +97,12 @@ export class SvgGenerator extends LatexGenerator {
 
     // If PDF generation fails, return information about the failure.
     if (!pdfGenerateResult.builtFilePath) {
-      return new GenerateResult(null, false)
+      return new GenerateResult()
     }
 
     // Convert the PDF file to SVG using pdftocairo.
     if (!pdfGenerateResult.wasCached || !fs.existsSync(svgFilePath)) {
-      const pdfToCairo = new PdfToCairo()
+      const pdfToCairo = new PdfToCairoCommand()
       svgFilePath = pdfToCairo.run(path.dirname(pdfGenerateResult.builtFilePath), `${fileName}.pdf`)
       if (svgFilePath && this.optimize) {
         const svgContent = fs.readFileSync(svgFilePath, { encoding: 'utf8' })
@@ -120,7 +128,10 @@ export class SvgGenerator extends LatexGenerator {
     }
 
     // Return information about the generated SVG file.
-    return new GenerateResult(svgFilePath, pdfGenerateResult.wasCached)
+    return new GenerateResult({
+      builtFilePath: svgFilePath,
+      wasCached: pdfGenerateResult.wasCached
+    })
   }
 }
 
@@ -132,7 +143,7 @@ const forceUnit: PluginConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (_root: XastRoot, params: any) => {
     const requiredUnit = params?.unit ?? 'pt'
-    const size: { [key: string]: string | null } = {width: null, height: null}
+    const size: { [key: string]: string | null } = { width: null, height: null }
     return {
       element: {
         enter: (node: XastElement, parentNode: XastParent) => {

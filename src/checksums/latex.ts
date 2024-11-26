@@ -16,7 +16,7 @@ export class LatexIncludeCommand {
   /**
    * Directories to search for files related to this command.
    */
-  directories: (string | null)[]
+  directories: string[]
   /**
    * Possible file extensions for this command.
    */
@@ -36,14 +36,30 @@ export class LatexIncludeCommand {
 
   /**
    * Creates a new `LatexIncludeCommand` instance.
+   *
+   * @param {string} command LaTeX command for inclusion.
+   * @param directories Directories to search for files related to this command.
+   * @param extensions Possible file extensions for this command.
+   * @param excludes File names to exclude for this command.
+   * @param hasIncludes Indicates whether the command involves nested includes.
+   * @param targetIsDirectory Indicates whether the target of the command is a directory.
    */
   constructor(
     command: string,
-    directories: (string | null)[] = [],
-    extensions: string[] = ['.tex'],
-    excludes: string[] = [],
-    hasIncludes: boolean = true,
-    targetIsDirectory: boolean = false,
+    {
+      directories = [],
+      extensions = ['.tex'],
+      excludes = [],
+      hasIncludes = true,
+      targetIsDirectory = false
+    }: {
+      command?: string
+      directories?: string[]
+      extensions?: string[]
+      excludes?: string[]
+      hasIncludes?: boolean
+      targetIsDirectory?: boolean
+    } = {}
   ) {
     this.command = command
     this.directories = directories
@@ -71,7 +87,7 @@ export class LatexIncludeCommand {
     const regex = new RegExp(`\\\\${this.command}(\\[[A-Za-zÀ-ÖØ-öø-ÿ\\d, =.\\\\-]*])?{([A-Za-zÀ-ÖØ-öø-ÿ\\d/, .\\-:_]+)}`, 'gs')
 
     // Read the content of the LaTeX file.
-    const content = fs.readFileSync(filePath, {encoding: 'utf8'})
+    const content = fs.readFileSync(filePath, { encoding: 'utf8' })
 
     // Execute the regular expression on the content.
     let match = regex.exec(content)
@@ -88,7 +104,7 @@ export class LatexIncludeCommand {
           null,
           currentDirectory,
           ...this.directories.map(directory => path.resolve(currentDirectory, directory)),
-          ...this.directories,
+          ...this.directories
         ]
         if (fileDirectory !== currentDirectory) {
           directories.push(fileDirectory)
@@ -114,16 +130,18 @@ export class LatexIncludeCommand {
                 if (this.hasIncludes) {
                   directoryChecksums[subKey] = checksumsCalculator.calculateFileChecksums(
                     subPath,
-                    currentDirectory,
+                    currentDirectory
                   )
-                } else {
-                  directoryChecksums[subKey] = checksumsCalculator.generateChecksum(fs.readFileSync(subPath, {encoding: 'utf8'}))
+                }
+                else {
+                  directoryChecksums[subKey] = checksumsCalculator.generateChecksum(fs.readFileSync(subPath, { encoding: 'utf8' }))
                 }
               }
               checksums[checksumKey] = directoryChecksums
               break
             }
-          } else {
+          }
+          else {
             // Check each possible extension for the include file.
             const extensions = ['', ...this.extensions]
             for (const extension of extensions) {
@@ -141,8 +159,9 @@ export class LatexIncludeCommand {
               // Calculate checksums for included files.
               if (this.hasIncludes) {
                 checksums[checksumKey] = checksumsCalculator.calculateFileChecksums(includeFile, currentDirectory)
-              } else {
-                checksums[checksumKey] = checksumsCalculator.generateChecksum(fs.readFileSync(includeFile, {encoding: 'utf8'}))
+              }
+              else {
+                checksums[checksumKey] = checksumsCalculator.generateChecksum(fs.readFileSync(includeFile, { encoding: 'utf8' }))
               }
               break
             }
@@ -161,7 +180,7 @@ export class LatexIncludeCommand {
     // `include` command for other LaTeX files.
     new LatexIncludeCommand('include'),
     // `input` command for other LaTeX files.
-    new LatexIncludeCommand('input'),
+    new LatexIncludeCommand('input')
   ]
 
   /**
@@ -172,12 +191,11 @@ export class LatexIncludeCommand {
    */
   static includeGraphics = (includeGraphicsDirectories: string[]): LatexIncludeCommand => new LatexIncludeCommand(
     'includegraphics',
-    includeGraphicsDirectories,
-    ['.pdf', '.svg', '.png', '.jpeg', '.jpg'],
-    [],
-    false,
-    false,
-  )
+    {
+      directories: includeGraphicsDirectories,
+      extensions: ['.pdf', '.svg', '.png', '.jpeg', '.jpg'],
+      hasIncludes: false
+    })
 }
 
 /**
@@ -193,7 +211,11 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
    * Creates a new `ChecksumsCalculator` instance.
    */
   constructor(
-    latexIncludeCommands: LatexIncludeCommand[] = LatexIncludeCommand.defaultLatexIncludeCommands
+    {
+      latexIncludeCommands = LatexIncludeCommand.defaultLatexIncludeCommands
+    }: {
+      latexIncludeCommands?: LatexIncludeCommand[]
+    } = {}
   ) {
     super()
     this.latexIncludeCommands = latexIncludeCommands
@@ -208,7 +230,7 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
    */
   override calculateFileChecksums = (
     filePath: string,
-    currentDirectory: string | null = null,
+    currentDirectory: string | null = null
   ): Checksums => {
     // If currentDirectory is not provided, use the directory of the LaTeX file.
     const fileDirectory = path.dirname(filePath)
@@ -218,7 +240,7 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
     const checksums: Checksums = {}
 
     // Calculate and store the checksum for the main LaTeX file.
-    checksums[`file:${getFileName(filePath)}`] = this.generateChecksum(fs.readFileSync(filePath, {encoding: 'utf8'}))
+    checksums[`file:${getFileName(filePath)}`] = this.generateChecksum(fs.readFileSync(filePath, { encoding: 'utf8' }))
 
     // Iterate through each LaTeX include command.
     for (const latexIncludeCommand of this.latexIncludeCommands) {

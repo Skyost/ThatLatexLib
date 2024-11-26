@@ -1,7 +1,7 @@
 import { getFileName } from '../utils/utils'
 import * as path from 'path'
 import * as fs from 'fs'
-import { LatexMk } from '../commands'
+import { LatexMkCommand } from '../commands'
 import { LatexGenerator } from './generator'
 import { GenerateResult } from './result'
 
@@ -27,11 +27,17 @@ export class PdfGenerateResult extends GenerateResult {
    * @param checksumsFilePath Path to the checksums file or `null` if generation fails.
    */
   constructor(
-    builtFilePath: string | null,
-    wasCached: boolean = false,
-    checksumsFilePath: string | null = null
+    {
+      builtFilePath = null,
+      wasCached = false,
+      checksumsFilePath = null
+    }: {
+      builtFilePath?: string | null
+      wasCached?: boolean
+      checksumsFilePath?: string | null
+    } = {}
   ) {
-    super(builtFilePath, wasCached)
+    super({ builtFilePath, wasCached })
     this.checksumsFilePath = checksumsFilePath
   }
 }
@@ -39,7 +45,7 @@ export class PdfGenerateResult extends GenerateResult {
 /**
  * Class for caching information.
  */
-export class CacheResult {
+export interface CacheResult {
   /**
    * Indicates whether the file and its checksums are fully cached.
    */
@@ -56,26 +62,6 @@ export class CacheResult {
    * Path to the cached checksums file.
    */
   cachedChecksumsFilePath: string
-
-  /**
-   * Creates a new `CacheResult` instance.
-   *
-   * @param isFullyCached Indicates whether the file and its checksums are fully cached.
-   * @param checksums Checksums of the file and its dependencies.
-   * @param cachedPdfFilePath Path to the cached PDF file.
-   * @param cachedChecksumsFilePath Path to the cached checksums file.
-   */
-  constructor(
-    isFullyCached: boolean,
-    checksums: string,
-    cachedPdfFilePath: string,
-    cachedChecksumsFilePath: string
-  ) {
-    this.isFullyCached = isFullyCached
-    this.checksums = checksums
-    this.cachedPdfFilePath = cachedPdfFilePath
-    this.cachedChecksumsFilePath = cachedChecksumsFilePath
-  }
 }
 
 /**
@@ -116,7 +102,11 @@ export class PdfGenerator extends LatexGenerator {
         )
       }
       // Return information indicating that the file was retrieved from the cache.
-      return new PdfGenerateResult(pdfFilePath, true, checksumsFilePath)
+      return new PdfGenerateResult({
+        builtFilePath: pdfFilePath,
+        wasCached: true,
+        checksumsFilePath: checksumsFilePath
+      })
     }
 
     // Retrieve cache information if caching is enabled.
@@ -130,11 +120,15 @@ export class PdfGenerator extends LatexGenerator {
       fs.copyFileSync(cacheResult.cachedPdfFilePath, pdfFilePath)
       fs.copyFileSync(cacheResult.cachedChecksumsFilePath, checksumsFilePath)
       // Return information indicating that the file was retrieved from the cache.
-      return new PdfGenerateResult(pdfFilePath, true, checksumsFilePath)
+      return new PdfGenerateResult({
+        builtFilePath: pdfFilePath,
+        wasCached: true,
+        checksumsFilePath: checksumsFilePath
+      })
     }
 
     // Generate the PDF file using latexmk.
-    const latexMk = new LatexMk()
+    const latexMk = new LatexMkCommand()
     pdfFilePath = latexMk.run(directory, `${fileName}.tex`, this.clean)
 
     // If PDF generation is successful, save the checksums and clean auxiliary files.
@@ -148,7 +142,10 @@ export class PdfGenerator extends LatexGenerator {
     }
 
     // Return information about the generated PDF file.
-    return new PdfGenerateResult(pdfFilePath, false, pdfFilePath == null ? null : checksumsFilePath)
+    return new PdfGenerateResult({
+      builtFilePath: pdfFilePath,
+      checksumsFilePath: pdfFilePath == null ? null : checksumsFilePath
+    })
   }
 
   /**
@@ -175,17 +172,17 @@ export class PdfGenerator extends LatexGenerator {
     const cachedChecksumsFilePath = path.resolve(cacheDirectoryPath, `${fileName}${checksumsExtension}`)
 
     // Check if both the cached PDF and checksums files exist, and if the checksums match the expected values.
-    const isFullyCached =
-      fs.existsSync(cachedPdfFilePath) &&
-      fs.existsSync(cachedChecksumsFilePath) &&
-      checksums === fs.readFileSync(cachedChecksumsFilePath, { encoding: 'utf8' })
+    const isFullyCached
+      = fs.existsSync(cachedPdfFilePath)
+      && fs.existsSync(cachedChecksumsFilePath)
+      && checksums === fs.readFileSync(cachedChecksumsFilePath, { encoding: 'utf8' })
 
     // Return the cache information, including the cached file paths and checksums.
-    return new CacheResult(
+    return {
       isFullyCached,
       checksums,
       cachedPdfFilePath,
       cachedChecksumsFilePath
-    )
+    }
   }
 }

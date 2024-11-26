@@ -17,9 +17,14 @@ export class GenerateResult {
    * @param builtFilePath Path to the generated file or `null` if generation fails.
    * @param wasCached Indicates whether the file was retrieved from the cache.
    */
-  constructor (
-    builtFilePath: string | null,
-    wasCached: boolean = false
+  constructor(
+    {
+      builtFilePath = null,
+      wasCached = false
+    }: {
+      builtFilePath?: string | null
+      wasCached?: boolean
+    } = {}
   ) {
     this.builtFilePath = builtFilePath
     this.wasCached = wasCached
