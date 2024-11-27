@@ -189,13 +189,16 @@ export class LatexIncludeCommand {
    * @param {string[]} includeGraphicsDirectories Directories for including graphics.
    * @returns {LatexIncludeCommand} The includegraphics` command.
    */
-  static includeGraphics = (includeGraphicsDirectories: string[]): LatexIncludeCommand => new LatexIncludeCommand(
-    'includegraphics',
-    {
-      directories: includeGraphicsDirectories,
-      extensions: ['.pdf', '.svg', '.png', '.jpeg', '.jpg'],
-      hasIncludes: false
-    })
+  static includeGraphics(includeGraphicsDirectories: string[]): LatexIncludeCommand {
+    return new LatexIncludeCommand(
+      'includegraphics',
+      {
+        directories: includeGraphicsDirectories,
+        extensions: ['.pdf', '.svg', '.png', '.jpeg', '.jpg'],
+        hasIncludes: false
+      }
+    )
+  }
 }
 
 /**
@@ -228,10 +231,10 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
    * @param {string | null} currentDirectory Current directory (used for relative paths).
    * @returns {Checksums} Object containing checksums for the file and its dependencies.
    */
-  override calculateFileChecksums = (
+  override calculateFileChecksums(
     filePath: string,
     currentDirectory: string | null = null
-  ): Checksums => {
+  ): Checksums {
     // If currentDirectory is not provided, use the directory of the LaTeX file.
     const fileDirectory = path.dirname(filePath)
     currentDirectory ??= fileDirectory
@@ -249,15 +252,4 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
     // Return the calculated checksums.
     return checksums
   }
-
-  /**
-   * Generates an MD5 checksum for a given string.
-   *
-   * @param {string} string Input string.
-   * @returns {string} MD5 checksum.
-   */
-  generateChecksum = (string: string): string => crypto
-    .createHash('md5')
-    .update(string, 'utf8')
-    .digest('hex')
 }

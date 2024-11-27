@@ -156,11 +156,11 @@ export class PdfGenerator extends LatexGenerator {
    * @param {string | null} cachedFileName The cached file name.
    * @returns {CacheResult | null} Cache information or null if not fully cached.
    */
-  getCacheInfo = (
+  getCacheInfo(
     texFilePath: string,
     cacheDirectoryPath: string,
     cachedFileName: string | null = null
-  ): CacheResult => {
+  ): CacheResult {
     // Extract the file name from the given LaTeX file path.
     const fileName = cachedFileName ?? getFileName(texFilePath)
 

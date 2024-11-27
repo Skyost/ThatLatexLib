@@ -66,10 +66,10 @@ export class PandocTransformer {
    * @param {string} texFileContent The Latex file content.
    * @return {TransformResult} The transformation result.
    */
-  transform = (
+  transform(
     texFilePath: string,
     texFileContent?: string
-  ): TransformResult => {
+  ): TransformResult {
     // Read the tex content.
     let content = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
 
@@ -106,10 +106,10 @@ export class PandocTransformer {
    * @param {string} texFilePath The path of the LaTeX file from the content directory.
    * @returns {ImageSrcResolverResult[]} The replaced images.
    */
-  replaceImages = (
+  replaceImages(
     root: HTMLElement,
     texFilePath: string
-  ): ImageSrcResolverResult[] => {
+  ): ImageSrcResolverResult[] {
     // Contains the result.
     const result: ImageSrcResolverResult[] = []
 
@@ -142,7 +142,7 @@ export class PandocTransformer {
    *
    * @param {HTMLElement} root The root elements.
    */
-  renderMath = (root: HTMLElement) => {
+  renderMath(root: HTMLElement) {
     const mathElements = root.querySelectorAll('eq')
     for (const mathElement of mathElements) {
       // Replace the math element with the rendered KaTeX HTML.

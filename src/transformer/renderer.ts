@@ -11,7 +11,7 @@ export abstract class MathRenderer {
    * @param {string} element The math element.
    * @returns {string} The rendered math content.
    */
-  abstract renderMathElement: (element: HTMLElement) => string
+  abstract renderMathElement(element: HTMLElement): string
 }
 
 /**
@@ -26,11 +26,11 @@ export class KatexRenderer extends MathRenderer {
    * @param {(math: string) => string} filterUnknownSymbols Allows to filter unknown symbols.
    * @returns {string} The rendered math content.
    */
-  renderMathElement = (
+  override renderMathElement(
     element: HTMLElement,
     macros?: { [key: string]: string },
     filterUnknownSymbols?: (math: string) => string
-  ): string => {
+  ): string {
     const math = element.text.trim()
     return katex.renderToString(filterUnknownSymbols?.call(this, math) ?? math, {
       displayMode: element.getAttribute('env') === 'displaymath', // Determine if it's a display math environment.

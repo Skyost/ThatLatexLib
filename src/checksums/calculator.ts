@@ -11,7 +11,7 @@ export abstract class ChecksumsCalculator {
    * @param {string} filePath Path to the main file.
    * @returns {Checksums} Object containing checksums for the file.
    */
-  abstract calculateFileChecksums: (filePath: string) => Checksums
+  abstract calculateFileChecksums(filePath: string): Checksums
 
   /**
    * Generates an MD5 checksum for a given string.
@@ -19,8 +19,10 @@ export abstract class ChecksumsCalculator {
    * @param {string} string Input string.
    * @returns {string} MD5 checksum.
    */
-  generateChecksum = (string: string): string => crypto
-    .createHash('md5')
-    .update(string, 'utf8')
-    .digest('hex')
+  generateChecksum(string: string): string {
+    return crypto
+      .createHash('md5')
+      .update(string, 'utf8')
+      .digest('hex')
+  }
 }

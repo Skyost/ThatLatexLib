@@ -51,10 +51,10 @@ export abstract class LatexImageExtractor {
    * @param {string} texFilePath The absolute path of the LaTeX file.
    * @returns {string} The modified LaTeX content with HTML-friendly image references.
    */
-  extractImages = (
+  extractImages(
     latexContent: string,
     texFilePath: string
-  ): string => {
+  ): string {
     // Clone the original LaTeX content.
     let result = latexContent
 
@@ -70,9 +70,10 @@ export abstract class LatexImageExtractor {
     // Process all matches for the current block type.
     while (match) {
       // Destination path for the extracted image LaTeX file.
+      const name = this.getExtractedImageFilename(i)
       const extractedImageTexFilePath = path.resolve(
-        this.getExtractedImageDirectoryPath(texFilePath),
-        this.getExtractedImageFilename(i)
+        this.getExtractedImageDirectoryPath(texFilePath, name),
+        name
       )
 
       // Create directories if they don't exist.
@@ -119,16 +120,18 @@ export abstract class LatexImageExtractor {
    * Should return the extracted image directory.
    *
    * @param {string} extractedFrom Where the file comes from.
+   * @param {string} extractedFileName The extracted file name.
    * @returns {string} The extracted image cache directory.
    */
-  getExtractedImageDirectoryPath(extractedFrom: string): string {
+  getExtractedImageDirectoryPath(extractedFrom: string, extractedFileName: string): string {
+    extractedFileName.toString()
     return path.dirname(extractedFrom)
   }
 
   /**
    * Renders the Latex content into a Latex document.
    */
-  abstract renderContent: ContentRenderer
+  abstract renderContent(extractedImageTexFilePath: string, latexContent: string): string
 
   /**
    * Should return the extracted image cache directory (where the transformer can find the checksums,
@@ -202,7 +205,7 @@ export class LatexImageExtractorInDirectory extends LatexImageExtractor {
     return this.directoryPath
   }
 
-  override renderContent: ContentRenderer = (extractedImageTexFilePath: string, latexContent: string): string => {
+  override renderContent(extractedImageTexFilePath: string, latexContent: string): string {
     return this.contentRenderer(extractedImageTexFilePath, latexContent)
   }
 }
