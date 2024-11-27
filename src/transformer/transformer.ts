@@ -273,7 +273,7 @@ export class PandocTransformer {
 
     // Return the relative path from the assets destination directory.
     return {
-      resolvedSrc: imagePathToSrc?.call(imagePath) ?? '/' + path.relative(path.dirname(assetsRootDirectoryPath), imagePath).replace(/\\/g, '/'),
+      resolvedSrc: imagePathToSrc?.call(this, imagePath) ?? '/' + path.relative(path.dirname(assetsRootDirectoryPath), imagePath).replace(/\\/g, '/'),
       resolvedToFilePath: imagePath
     }
   }

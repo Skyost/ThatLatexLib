@@ -1,6 +1,6 @@
 {
   "name": "that-latex-lib",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Compile LaTeX files to PDF using the local TeX installation, convert them to HTML using Pandoc, extract & convert images, and more !",
   "main": "build/index.js",
   "types": "index.ts",
