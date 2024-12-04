@@ -1,4 +1,6 @@
-# ThatLatexLib
+<div align="center">
+<img src="https://raw.githubusercontent.com/Skyost/ThatLatexLib/refs/heads/master/logo.svg" height="100" title="That LaTeX lib" alt="That LaTeX lib"/>
+</div>
 
 Just a very simple wrapper around `latexmk`, `pdftocairo`, `svgo` and `pandoc` that allows me
 to convert my LaTeX documents into a PDF, a SVG or an HTML document.
