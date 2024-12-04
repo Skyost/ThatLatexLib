@@ -121,7 +121,7 @@ export abstract class LatexImageExtractor {
    *
    * @param {string} extractedFrom Where the file comes from.
    * @param {string} extractedFileName The extracted file name.
-   * @returns {string} The extracted image cache directory.
+   * @returns {string} The extracted image directory path.
    */
   getExtractedImageDirectoryPath(extractedFrom: string, extractedFileName: string): string {
     extractedFileName.toString()
@@ -134,8 +134,7 @@ export abstract class LatexImageExtractor {
   abstract renderContent(extractedImageTexFilePath: string, latexContent: string): string
 
   /**
-   * Should return the extracted image cache directory (where the transformer can find the checksums,
-   * the previous build, ...).
+   * Should return the extracted image filename.
    *
    * @returns {string} The extracted image path.
    */
@@ -149,7 +148,7 @@ export abstract class LatexImageExtractor {
    *
    * @param {string} extractedFrom Where the file comes from.
    * @param {string} extractedImageTexFilePath The extracted file path.
-   * @returns {string} The extracted image cache directory.
+   * @returns {string} The extracted image cache directory path.
    */
   getExtractedImageCacheDirectoryPath(
     extractedFrom: string,
