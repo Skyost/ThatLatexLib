@@ -4,8 +4,9 @@
 
 <br>
 
-Just a very simple wrapper around `latexmk`, `pdftocairo`, `svgo` and `pandoc` that allows me
+A very simple wrapper around `latexmk`, `pdftocairo`, `svgo` and `pandoc` that allows me
 to convert my LaTeX documents into a PDF, a SVG or an HTML document.
+Best used with [`skyost/latex-docker`](https://github.com/Skyost/LaTeXDocker) Docker image.
 
 ## Features
 
