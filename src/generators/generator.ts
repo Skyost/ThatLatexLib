@@ -1,5 +1,5 @@
-import { LatexChecksumsCalculator, ChecksumsCalculator } from '../checksums'
-import { GenerateResult } from './result'
+import { LatexChecksumsCalculator, type ChecksumsCalculator } from '../checksums'
+import type { GenerateResult } from './result'
 
 /**
  * Allows to generate a file.

@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import { consola, ConsolaInstance } from 'consola'
+import { consola, type ConsolaInstance } from 'consola'
 import { SvgGenerator } from '../generators'
 
 /**

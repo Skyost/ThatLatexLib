@@ -1,4 +1,4 @@
-import { Checksums } from './checksums'
+import type { Checksums } from './checksums'
 import * as crypto from 'crypto'
 
 /**

@@ -1,8 +1,7 @@
 import * as path from 'path'
 import { getFileName } from '../utils/utils'
 import * as fs from 'fs'
-import * as crypto from 'crypto'
-import { Checksums } from './checksums'
+import type { Checksums } from './checksums'
 import { ChecksumsCalculator } from './calculator'
 
 /**

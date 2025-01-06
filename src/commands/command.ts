@@ -1,4 +1,4 @@
-import { consola, ConsolaInstance } from 'consola'
+import { consola, type ConsolaInstance } from 'consola'
 
 /**
  * A command for generating a file from another.
