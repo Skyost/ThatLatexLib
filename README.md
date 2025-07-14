@@ -14,7 +14,7 @@ Best used with [`skyost/latex-docker`](https://github.com/Skyost/LaTeXDocker) Do
 * Calculate TeX files checksums so that you don't have to regenerate it each time
   you want a PDF.
 * Extract and convert your `tikzpicture` images from your LaTeX documents.
-* Automatically compresses your SVG files using SVGO.
+* Automatically compress your SVG files using SVGO.
 * Render transformed HTML math elements using Katex (can easily be configured).
 
 ## Use cases
