@@ -15,16 +15,24 @@ export class TransformResult {
    */
   replacedImages: ImageSrcResolverResult[]
 
+  /**
+   * The math CSS content.
+   */
+  mathCss: string[]
+
   constructor(
     {
       htmlResult = null,
-      replacedImages = []
+      replacedImages = [],
+      mathCss = []
     }: {
       htmlResult?: HTMLElement | null
       replacedImages?: ImageSrcResolverResult[]
+      mathCss?: string[]
     } = {}
   ) {
     this.htmlResult = htmlResult
     this.replacedImages = replacedImages
+    this.mathCss = mathCss
   }
 }

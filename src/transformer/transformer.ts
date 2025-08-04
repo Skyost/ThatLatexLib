@@ -64,12 +64,12 @@ export class PandocTransformer {
    *
    * @param {string} texFilePath Path to the main LaTeX file.
    * @param {string} texFileContent The Latex file content.
-   * @return {TransformResult} The transformation result.
+   * @returns {TransformResult} The transformation result.
    */
-  transform(
+  async transform(
     texFilePath: string,
     texFileContent?: string
-  ): TransformResult {
+  ): Promise<TransformResult> {
     // Read the tex content.
     let content = texFileContent ?? fs.readFileSync(texFilePath, { encoding: 'utf8' })
 
@@ -91,11 +91,12 @@ export class PandocTransformer {
     const replacedImages = this.replaceImages(root, texFilePath)
 
     // Render math.
-    this.renderMath(root)
+    const mathCss = await this.renderMath(root)
 
     return new TransformResult({
       htmlResult: root,
-      replacedImages
+      replacedImages,
+      mathCss
     })
   }
 
@@ -141,13 +142,21 @@ export class PandocTransformer {
    * Render all math elements.
    *
    * @param {HTMLElement} root The root elements.
+   *
+   * @returns {string[]} The CSS parts.
    */
-  renderMath(root: HTMLElement) {
+  async renderMath(root: HTMLElement): Promise<string[]> {
+    const css: string[] = []
     const mathElements = root.querySelectorAll('eq')
     for (const mathElement of mathElements) {
       // Replace the math element with the rendered KaTeX HTML.
-      mathElement.replaceWith(this.mathRenderer.renderMathElement(mathElement))
+      const renderObject = await this.mathRenderer.renderMathElement(mathElement)
+      mathElement.replaceWith(renderObject.html)
+      if (!css.includes(renderObject.css)) {
+        css.push(renderObject.css)
+      }
     }
+    return css
   }
 
   /**
