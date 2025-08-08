@@ -1,18 +1,17 @@
 import type { HTMLElement } from 'node-html-parser'
-import { mathjax } from '@mathjax/src/ts/mathjax.js'
-import { TeX } from '@mathjax/src/ts/input/tex.js'
-import { CHTML } from '@mathjax/src/ts/output/chtml.js'
-import { liteAdaptor } from '@mathjax/src/ts/adaptors/liteAdaptor.js'
+import { mathjax } from '@mathjax/src/mjs/mathjax.js'
+import { CHTML } from '@mathjax/src/mjs/output/chtml.js'
+import { TeX } from '@mathjax/src/mjs/input/tex.js'
+import { liteAdaptor } from '@mathjax/src/mjs/adaptors/liteAdaptor.js'
+import { RegisterHTMLHandler } from '@mathjax/src/mjs/handlers/html.js'
+import { MathDocument } from '@mathjax/src/mjs/core/MathDocument.js'
+import { LiteElement } from '@mathjax/src/mjs/adaptors/lite/Element.js'
+import { LiteText } from '@mathjax/src/mjs/adaptors/lite/Text.js'
+import { LiteDocument } from '@mathjax/src/mjs/adaptors/lite/Document.js'
+import { DOMAdaptor } from '@mathjax/src/mjs/core/DOMAdaptor.js'
+import { InputJax } from '@mathjax/src/mjs/core/InputJax.js'
+import { OutputJax } from '@mathjax/src/mjs/core/OutputJax.js'
 import { MathRenderer, RenderObject } from './renderer'
-import { RegisterHTMLHandler } from '@mathjax/src/ts/handlers/html'
-import { MathDocument } from '@mathjax/src/ts/core/MathDocument'
-import { LiteElement } from '@mathjax/src/ts/adaptors/lite/Element'
-import { LiteText } from '@mathjax/src/ts/adaptors/lite/Text'
-import { LiteDocument } from '@mathjax/src/ts/adaptors/lite/Document'
-import { DOMAdaptor } from '@mathjax/src/ts/core/DOMAdaptor'
-import { InputJax } from '@mathjax/src/ts/core/InputJax'
-import { OutputJax } from '@mathjax/src/ts/core/OutputJax'
-import TexError from '@mathjax/src/ts/input/tex/TexError'
 
 /**
  * The MathJax math renderer.
@@ -76,7 +75,7 @@ export class MathJaxRenderer extends MathRenderer {
 
     this.inputJax = inputJax ?? new TeX<LiteElement, LiteText, LiteDocument>({
       packages: ['base', 'ams', 'color', 'newcommand'],
-      formatError: (jax: TeX<LiteElement, LiteText, LiteDocument>, error: TexError) => {
+      formatError: (jax: TeX<LiteElement, LiteText, LiteDocument>, error) => {
         console.error(error.message)
         jax.formatError(error)
       }
