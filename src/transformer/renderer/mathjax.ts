@@ -3,11 +3,6 @@ import { mathjax } from '@mathjax/src/ts/mathjax.js'
 import { TeX } from '@mathjax/src/ts/input/tex.js'
 import { CHTML } from '@mathjax/src/ts/output/chtml.js'
 import { liteAdaptor } from '@mathjax/src/ts/adaptors/liteAdaptor.js'
-import '@mathjax/src/js/util/asyncLoad/esm.js'
-import '@mathjax/src/js/input/tex/base/BaseConfiguration.js'
-import '@mathjax/src/js/input/tex/ams/AmsConfiguration.js'
-import '@mathjax/src/js/input/tex/newcommand/NewcommandConfiguration.js'
-import '@mathjax/src/js/input/tex/noundefined/NoundefinedConfiguration.js'
 import { MathRenderer, RenderObject } from './renderer'
 import { RegisterHTMLHandler } from '@mathjax/src/ts/handlers/html'
 import { MathDocument } from '@mathjax/src/ts/core/MathDocument'
@@ -17,6 +12,7 @@ import { LiteDocument } from '@mathjax/src/ts/adaptors/lite/Document'
 import { DOMAdaptor } from '@mathjax/src/ts/core/DOMAdaptor'
 import { InputJax } from '@mathjax/src/ts/core/InputJax'
 import { OutputJax } from '@mathjax/src/ts/core/OutputJax'
+import TexError from '@mathjax/src/ts/input/tex/TexError'
 
 /**
  * The MathJax math renderer.
@@ -79,8 +75,11 @@ export class MathJaxRenderer extends MathRenderer {
     RegisterHTMLHandler(this.adaptor)
 
     this.inputJax = inputJax ?? new TeX<LiteElement, LiteText, LiteDocument>({
-      packages: ['base', 'ams', 'newcommand', 'noundefined'],
-      formatError: (_, error) => console.error(error.message)
+      packages: ['base', 'ams', 'color', 'newcommand'],
+      formatError: (jax: TeX<LiteElement, LiteText, LiteDocument>, error: TexError) => {
+        console.error(error.message)
+        jax.formatError(error)
+      }
     })
     this.outputJax = outputJax ?? new CHTML<LiteElement, LiteText, LiteDocument>({
       fontURL: 'https://cdn.jsdelivr.net/npm/@mathjax/mathjax-newcm-font/chtml/woff2'
