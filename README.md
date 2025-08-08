@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/Skyost/ThatLatexLib/refs/heads/master/logo.svg" height="100" title="That LaTeX lib" alt="That LaTeX lib"/>
+<img src="https://raw.githubusercontent.com/Skyost/ThatLatexLib/refs/heads/main/logo.svg" height="100" title="That LaTeX lib" alt="That LaTeX lib"/>
 </div>
 
 <br>
@@ -32,8 +32,8 @@ Feel free to use it in your projects as well :wink:
 
 ## Usage
 
-Check the [tests directory](https://github.com/Skyost/ThatLatexLib/blob/master/tests/) to see how you can use this library.
+Check the [tests directory](https://github.com/Skyost/ThatLatexLib/blob/main/tests/) to see how you can use this library.
 
 ## License
 
-Licensed under the MIT license. See [here](https://github.com/Skyost/ThatLatexLib/blob/master/LICENSE).
+Licensed under the MIT license. See [here](https://github.com/Skyost/ThatLatexLib/blob/main/LICENSE).
