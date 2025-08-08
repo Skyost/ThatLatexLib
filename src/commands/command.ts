@@ -20,7 +20,7 @@ export abstract class GenerateCommand {
    * @param {string} commandName The command name.
    * @param {boolean} printLogs Whether to print logs (eg. on error).
    */
-  constructor(
+  protected constructor(
     commandName: string,
     {
       printLogs = true

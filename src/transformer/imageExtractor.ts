@@ -29,7 +29,7 @@ export abstract class LatexImageExtractor {
    * @param {SvgGenerator} svgGenerator The SVG generator instance.
    * @param printLogs Whether to print logs.
    */
-  constructor(
+  protected constructor(
     imageType: string,
     {
       svgGenerator = new SvgGenerator(),

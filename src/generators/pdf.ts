@@ -174,8 +174,8 @@ export class PdfGenerator extends LatexGenerator {
     // Check if both the cached PDF and checksums files exist, and if the checksums match the expected values.
     const isFullyCached
       = fs.existsSync(cachedPdfFilePath)
-      && fs.existsSync(cachedChecksumsFilePath)
-      && checksums === fs.readFileSync(cachedChecksumsFilePath, { encoding: 'utf8' })
+        && fs.existsSync(cachedChecksumsFilePath)
+        && checksums === fs.readFileSync(cachedChecksumsFilePath, { encoding: 'utf8' })
 
     // Return the cache information, including the cached file paths and checksums.
     return {
