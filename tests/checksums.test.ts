@@ -1,15 +1,16 @@
 // noinspection ES6PreferShortImport
 
 import { LatexChecksumsCalculator, LatexIncludeCommand } from '../src/checksums'
+import { describe, expect, test } from 'vitest'
 import * as path from 'path'
 
 describe('Checksums', () => {
-  it('simple checksums calculator', () => {
+  test('simple checksums calculator', () => {
     const calculator = new LatexChecksumsCalculator()
     const result = calculator.calculateFileChecksums(path.resolve(__dirname, '_files', 'simple.tex'))
     expect(result).toEqual({ 'file:simple': '108c59e46ac65f9eec3257d5b60903fe' })
   })
-  it('complex checksums calculator', () => {
+  test('complex checksums calculator', () => {
     const calculator = new LatexChecksumsCalculator({
       latexIncludeCommands: [
         LatexIncludeCommand.includeGraphics([path.resolve(__dirname, '_files', 'graphics')]),
