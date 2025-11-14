@@ -112,14 +112,7 @@ export class SvgGenerator extends LatexGenerator {
           multipass: true,
           floatPrecision: size >= 100000 ? 2 : 5,
           plugins: [
-            {
-              name: 'preset-default',
-              params: {
-                overrides: {
-                  removeViewBox: false
-                }
-              }
-            },
+            'preset-default',
             ...(this.svgoPlugins ?? [])
           ]
         })
