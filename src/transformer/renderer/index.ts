@@ -1,3 +1,3 @@
-export * from './katex'
-export * from './mathjax'
-export * from './renderer'
+export * from './katex.js'
+export * from './mathjax.js'
+export * from './renderer.js'

@@ -1,8 +1,8 @@
-import { execSync } from 'child_process'
-import { getFileName } from '../utils/utils'
+import { spawnSync } from 'child_process'
+import { getFileName } from '../utils/utils.js'
 import * as path from 'path'
 import * as fs from 'fs'
-import { GenerateCommand } from './command'
+import { GenerateCommand } from './command.js'
 
 /**
  * `latexmk` command.
@@ -34,7 +34,13 @@ export class LatexMkCommand extends GenerateCommand {
   override run(directory: string, texFile: string, clean: boolean = true): string | null {
     try {
       // Execute latexmk command to compile the LaTeX file using LuaLaTeX.
-      execSync(`${this.commandName} -lualatex "${texFile}"`, { cwd: directory, stdio: 'ignore' })
+      const commandResult = spawnSync(this.commandName, ['-lualatex', texFile], {
+        cwd: directory,
+        encoding: 'utf8'
+      })
+      if (commandResult.status !== 0) {
+        throw commandResult.error ?? commandResult.stderr ?? new Error(`${this.commandName} exited with status ${commandResult.status}`)
+      }
       // Generate the path to the resulting PDF file.
       const result = path.resolve(directory, `${getFileName(texFile)}.pdf`)
 
@@ -69,6 +75,12 @@ export class LatexMkCommand extends GenerateCommand {
    * @param directory The directory.
    */
   clean(directory: string) {
-    execSync(`${this.commandName} -quiet -c`, { cwd: directory })
+    const result = spawnSync(this.commandName, ['-quiet', '-c'], {
+      cwd: directory,
+      encoding: 'utf8'
+    })
+    if (result.status !== 0) {
+      throw result.error ?? result.stderr ?? new Error(`${this.commandName} cleanup exited with status ${result.status}`)
+    }
   }
 }

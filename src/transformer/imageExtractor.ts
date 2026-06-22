@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { consola, type ConsolaInstance } from 'consola'
-import { SvgGenerator } from '../generators'
+import { SvgGenerator } from '../generators/index.js'
 
 /**
  * Allows to extract images from a Latex file.

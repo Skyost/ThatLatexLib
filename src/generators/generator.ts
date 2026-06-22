@@ -1,5 +1,5 @@
-import { LatexChecksumsCalculator, type ChecksumsCalculator } from '../checksums'
-import type { GenerateResult } from './result'
+import { LatexChecksumsCalculator, type ChecksumsCalculator } from '../checksums/index.js'
+import type { GenerateResult } from './result.js'
 
 /**
  * Allows to generate a file.

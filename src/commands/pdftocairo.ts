@@ -1,8 +1,7 @@
-import { execSync } from 'child_process'
-import { getFileName } from '../utils/utils'
+import { spawnSync } from 'child_process'
+import { getFileName } from '../utils/utils.js'
 import * as path from 'path'
-import * as fs from 'fs'
-import { GenerateCommand } from './command'
+import { GenerateCommand } from './command.js'
 
 /**
  * `pdftocairo` command.
@@ -37,10 +36,13 @@ export class PdfToCairoCommand extends GenerateCommand {
       // Generate the full path to the SVG file.
       const svgFilePath = path.resolve(directory, svgFile)
 
-      // Check if the SVG file does not already exist.
-      if (!fs.existsSync(svgFilePath)) {
-        // Execute pdftocairo command to convert the PDF file to SVG.
-        execSync(`${this.commandName} -svg "${pdfFile}" "${svgFile}"`, { cwd: directory })
+      // Always overwrite the SVG: callers invoke this command when the PDF changed.
+      const result = spawnSync(this.commandName, ['-svg', pdfFile, svgFile], {
+        cwd: directory,
+        encoding: 'utf8'
+      })
+      if (result.status !== 0) {
+        throw result.error ?? result.stderr ?? new Error(`${this.commandName} exited with status ${result.status}`)
       }
 
       // Return the path to the generated SVG file.

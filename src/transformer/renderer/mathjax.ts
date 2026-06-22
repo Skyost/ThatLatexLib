@@ -11,7 +11,8 @@ import { LiteDocument } from '@mathjax/src/mjs/adaptors/lite/Document.js'
 import { DOMAdaptor } from '@mathjax/src/mjs/core/DOMAdaptor.js'
 import { InputJax } from '@mathjax/src/mjs/core/InputJax.js'
 import { OutputJax } from '@mathjax/src/mjs/core/OutputJax.js'
-import { MathRenderer, RenderObject } from './renderer'
+import type TexError from '@mathjax/src/mjs/input/tex/TexError.js'
+import { MathRenderer, RenderObject } from './renderer.js'
 
 /**
  * The MathJax math renderer.
@@ -75,7 +76,7 @@ export class MathJaxRenderer extends MathRenderer {
 
     this.inputJax = inputJax ?? new TeX<LiteElement, LiteText, LiteDocument>({
       packages: ['base', 'ams', 'color', 'newcommand'],
-      formatError: (jax: TeX<LiteElement, LiteText, LiteDocument>, error) => {
+      formatError: (jax: TeX<LiteElement, LiteText, LiteDocument>, error: TexError) => {
         console.error(error.message)
         jax.formatError(error)
       }

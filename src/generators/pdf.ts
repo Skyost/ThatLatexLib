@@ -1,9 +1,9 @@
-import { getFileName } from '../utils/utils'
+import { getFileName } from '../utils/utils.js'
 import * as path from 'path'
 import * as fs from 'fs'
-import { LatexMkCommand } from '../commands'
-import { LatexGenerator } from './generator'
-import { GenerateResult } from './result'
+import { LatexMkCommand } from '../commands/index.js'
+import { LatexGenerator } from './generator.js'
+import { GenerateResult } from './result.js'
 
 /**
  * The checksums file extension.
@@ -131,14 +131,13 @@ export class PdfGenerator extends LatexGenerator {
     const latexMk = new LatexMkCommand()
     pdfFilePath = latexMk.run(directory, `${fileName}.tex`, this.clean)
 
-    // If PDF generation is successful, save the checksums and clean auxiliary files.
+    // If PDF generation is successful, save the checksums.
     if (pdfFilePath) {
       fs.writeFileSync(
         checksumsFilePath,
         cacheResult?.checksums ?? JSON.stringify(this.checksumsCalculator.calculateFileChecksums(filePath)),
         { encoding: 'utf8' }
       )
-      latexMk.clean(directory)
     }
 
     // Return information about the generated PDF file.

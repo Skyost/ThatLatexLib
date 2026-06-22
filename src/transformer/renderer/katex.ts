@@ -2,7 +2,7 @@ import type { HTMLElement } from 'node-html-parser'
 import katex from 'katex'
 import { readFileSync } from 'fs'
 import { createRequire } from 'module'
-import { MathRenderer, type RenderObject } from './renderer'
+import { MathRenderer, type RenderObject } from './renderer.js'
 
 /**
  * The KaTeX math renderer.

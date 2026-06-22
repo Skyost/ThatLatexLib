@@ -1,4 +1,4 @@
-import { GenerateCommand } from './command'
+import { GenerateCommand } from './command.js'
 import { spawnSync } from 'child_process'
 
 /**

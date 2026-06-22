@@ -1,5 +1,5 @@
 import type { HTMLElement } from 'node-html-parser'
-import type { ImageSrcResolverResult } from './transformer'
+import type { ImageSrcResolverResult } from './transformer.js'
 
 /**
  * The return result of the transformer.

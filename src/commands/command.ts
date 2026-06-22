@@ -12,7 +12,7 @@ export abstract class GenerateCommand {
   /**
    * The logger.
    */
-  logger: ConsolaInstance | null
+  logger: ConsolaInstance | null = null
 
   /**
    * Creates a new `Command` instance.

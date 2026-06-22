@@ -1,13 +1,12 @@
-import { getFileName } from '../utils/utils'
+import { getFileName } from '../utils/utils.js'
 import * as path from 'path'
 import * as fs from 'fs'
-import { LatexGenerator } from './generator'
-import { optimize, type PluginConfig } from 'svgo'
-import type { XastElement, XastParent, XastRoot } from 'svgo/lib/types'
-import { GenerateResult } from './result'
-import { LatexChecksumsCalculator } from '../checksums'
-import { PdfToCairoCommand } from '../commands'
-import { PdfGenerator } from './pdf'
+import { LatexGenerator } from './generator.js'
+import { optimize, type PluginConfig, type XastElement, type XastParent, type XastRoot } from 'svgo'
+import { GenerateResult } from './result.js'
+import { LatexChecksumsCalculator } from '../checksums/index.js'
+import { PdfToCairoCommand } from '../commands/index.js'
+import { PdfGenerator } from './pdf.js'
 
 /**
  * Generates a SVG from a Latex file.

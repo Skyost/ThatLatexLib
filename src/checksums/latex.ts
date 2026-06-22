@@ -1,8 +1,8 @@
 import * as path from 'path'
-import { getFileName } from '../utils/utils'
+import { getFileName } from '../utils/utils.js'
 import * as fs from 'fs'
-import type { Checksums } from './checksums'
-import { ChecksumsCalculator } from './calculator'
+import type { Checksums } from './checksums.js'
+import { ChecksumsCalculator } from './calculator.js'
 
 /**
  * Interface defining a LaTeX inclusion command configuration.
@@ -83,7 +83,8 @@ export class LatexIncludeCommand {
   ) {
     const fileDirectory = path.dirname(filePath)
     // Define a regular expression based on the current LaTeX include command.
-    const regex = new RegExp(`\\\\${this.command}(\\[[A-Za-zÀ-ÖØ-öø-ÿ\\d, =.\\\\-]*])?{([A-Za-zÀ-ÖØ-öø-ÿ\\d/, .\\-:_]+)}`, 'gs')
+    const escapedCommand = this.command.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(`\\\\${escapedCommand}\\s*(?:\\[[^\\]]*]\\s*)?{([^{}]+)}`, 'gs')
 
     // Read the content of the LaTeX file.
     const content = fs.readFileSync(filePath, { encoding: 'utf8' })
@@ -93,7 +94,7 @@ export class LatexIncludeCommand {
 
     // Iterate through each match found in the content.
     while (match != null) {
-      const fileName = match[2]
+      const fileName = match[1].trim()
       const checksumKey = `${this.command}:${fileName}`
 
       // Check if the file should be excluded and if its checksum has not been calculated yet.
@@ -133,7 +134,7 @@ export class LatexIncludeCommand {
                   )
                 }
                 else {
-                  directoryChecksums[subKey] = checksumsCalculator.generateChecksum(fs.readFileSync(subPath, { encoding: 'utf8' }))
+                  directoryChecksums[subKey] = checksumsCalculator.generateChecksum(fs.readFileSync(subPath))
                 }
               }
               checksums[checksumKey] = directoryChecksums
@@ -160,7 +161,7 @@ export class LatexIncludeCommand {
                 checksums[checksumKey] = checksumsCalculator.calculateFileChecksums(includeFile, currentDirectory)
               }
               else {
-                checksums[checksumKey] = checksumsCalculator.generateChecksum(fs.readFileSync(includeFile, { encoding: 'utf8' }))
+                checksums[checksumKey] = checksumsCalculator.generateChecksum(fs.readFileSync(includeFile))
               }
               break
             }
@@ -209,6 +210,9 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
    */
   latexIncludeCommands: LatexIncludeCommand[]
 
+  /** Files currently being traversed, used to break cyclic includes. */
+  private readonly activeFiles = new Set<string>()
+
   /**
    * Creates a new `ChecksumsCalculator` instance.
    */
@@ -234,21 +238,32 @@ export class LatexChecksumsCalculator extends ChecksumsCalculator {
     filePath: string,
     currentDirectory: string | null = null
   ): Checksums {
-    // If currentDirectory is not provided, use the directory of the LaTeX file.
-    const fileDirectory = path.dirname(filePath)
-    currentDirectory ??= fileDirectory
-
-    // Initialize an object to store checksums.
-    const checksums: Checksums = {}
-
-    // Calculate and store the checksum for the main LaTeX file.
-    checksums[`file:${getFileName(filePath)}`] = this.generateChecksum(fs.readFileSync(filePath, { encoding: 'utf8' }))
-
-    // Iterate through each LaTeX include command.
-    for (const latexIncludeCommand of this.latexIncludeCommands) {
-      latexIncludeCommand.appendToChecksums(filePath, currentDirectory, this, checksums)
+    const resolvedFilePath = path.resolve(filePath)
+    if (this.activeFiles.has(resolvedFilePath)) {
+      return {}
     }
-    // Return the calculated checksums.
-    return checksums
+    this.activeFiles.add(resolvedFilePath)
+
+    try {
+      // If currentDirectory is not provided, use the directory of the LaTeX file.
+      const fileDirectory = path.dirname(filePath)
+      const rootDirectory = currentDirectory ?? fileDirectory
+
+      // Initialize an object to store checksums.
+      const checksums: Checksums = {}
+
+      // Calculate and store the checksum for the main LaTeX file.
+      const normalizedContent = fs.readFileSync(filePath, { encoding: 'utf8' }).replace(/\r\n?/g, '\n')
+      checksums[`file:${getFileName(filePath)}`] = this.generateChecksum(normalizedContent)
+
+      // Iterate through each LaTeX include command.
+      for (const latexIncludeCommand of this.latexIncludeCommands) {
+        latexIncludeCommand.appendToChecksums(filePath, rootDirectory, this, checksums)
+      }
+      return checksums
+    }
+    finally {
+      this.activeFiles.delete(resolvedFilePath)
+    }
   }
 }

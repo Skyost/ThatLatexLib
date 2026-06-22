@@ -1,12 +1,12 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import { parse, type HTMLElement } from 'node-html-parser'
-import { KatexRenderer, type MathRenderer } from './renderer'
-import { TransformResult } from './result'
-import { type LatexImageExtractor, LatexImageExtractorInDirectory } from './imageExtractor'
-import { getFileName } from '../utils/utils'
-import { PandocCommand, PdfToCairoCommand } from '../commands'
-import { SvgGenerator } from '../generators'
+import { KatexRenderer, type MathRenderer } from './renderer/index.js'
+import { TransformResult } from './result.js'
+import { type LatexImageExtractor, LatexImageExtractorInDirectory } from './imageExtractor.js'
+import { getFileName } from '../utils/utils.js'
+import { PandocCommand, PdfToCairoCommand } from '../commands/index.js'
+import { SvgGenerator } from '../generators/index.js'
 
 /**
  * Allows to transform a Latex file into HTML thanks to Pandoc.

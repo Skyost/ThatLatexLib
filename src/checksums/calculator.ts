@@ -1,4 +1,4 @@
-import type { Checksums } from './checksums'
+import type { Checksums } from './checksums.js'
 import * as crypto from 'crypto'
 
 /**
@@ -16,13 +16,13 @@ export abstract class ChecksumsCalculator {
   /**
    * Generates an MD5 checksum for a given string.
    *
-   * @param {string} string Input string.
+   * @param input Input data.
    * @returns {string} MD5 checksum.
    */
-  generateChecksum(string: string): string {
+  generateChecksum(input: string | NodeJS.ArrayBufferView): string {
     return crypto
       .createHash('md5')
-      .update(string, 'utf8')
+      .update(input)
       .digest('hex')
   }
 }
